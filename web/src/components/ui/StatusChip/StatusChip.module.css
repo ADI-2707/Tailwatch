@@ -1,0 +1,58 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  user-select: none;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+}
+
+.stateOk {
+  background-color: rgba(47, 191, 138, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(47, 191, 138, 0.25);
+}
+
+.stateOk .dot {
+  background-color: var(--success);
+}
+
+.statePending {
+  background-color: rgba(240, 180, 41, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(240, 180, 41, 0.25);
+}
+
+.statePending .dot {
+  background-color: var(--warning);
+}
+
+.stateFiring {
+  background-color: rgba(242, 87, 92, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(242, 87, 92, 0.25);
+}
+
+.stateFiring .dot {
+  background-color: var(--danger);
+  box-shadow: 0 0 6px var(--danger);
+}
+
+.stateResolved {
+  background-color: rgba(107, 119, 136, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(107, 119, 136, 0.25);
+}
+
+.stateResolved .dot {
+  background-color: var(--text-muted);
+}

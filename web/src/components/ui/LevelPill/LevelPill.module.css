@@ -1,0 +1,56 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.glyph {
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.levelTrace {
+  background-color: rgba(107, 119, 136, 0.15);
+  color: var(--lvl-trace);
+  border: 1px solid rgba(107, 119, 136, 0.3);
+}
+
+.levelDebug {
+  background-color: rgba(139, 155, 217, 0.15);
+  color: var(--lvl-debug);
+  border: 1px solid rgba(139, 155, 217, 0.3);
+}
+
+.levelInfo {
+  background-color: rgba(56, 189, 248, 0.15);
+  color: var(--lvl-info);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.levelWarn {
+  background-color: rgba(240, 180, 41, 0.15);
+  color: var(--lvl-warn);
+  border: 1px solid rgba(240, 180, 41, 0.3);
+}
+
+.levelError {
+  background-color: rgba(242, 87, 92, 0.15);
+  color: var(--lvl-error);
+  border: 1px solid rgba(242, 87, 92, 0.3);
+}
+
+.levelFatal {
+  background-color: rgba(232, 121, 249, 0.15);
+  color: var(--lvl-fatal);
+  border: 1px solid rgba(232, 121, 249, 0.3);
+}

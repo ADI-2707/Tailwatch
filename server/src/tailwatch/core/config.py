@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     tw_database_url: str = "postgresql://tailwatch:tailwatch@localhost:5432/tailwatch"
-    tw_valkey_url: str = "valkey://localhost:6379/0"
+    tw_valkey_url: str = "redis://localhost:6379/0"
     tw_master_key: str = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     tw_session_secret: str = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     tw_public_url: str = "http://localhost:80"

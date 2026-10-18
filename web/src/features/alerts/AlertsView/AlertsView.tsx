@@ -22,58 +22,60 @@ export const AlertsView: React.FC = () => {
   const [newRuleName, setNewRuleName] = useState("");
   const [newRuleQuery, setNewRuleQuery] = useState("");
   const [newRuleThreshold, setNewRuleThreshold] = useState("50");
+  const [rules, setRules] = useState<AlertRule[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const [rules, setRules] = useState<AlertRule[]>([
-    {
-      id: "1",
-      name: "Payment errors high",
-      query: "service:payment level:>=error",
-      threshold: 50,
-      window_m: 5,
-      state: "ok",
-      enabled: true,
-    },
-    {
-      id: "2",
-      name: "Worker silent heartbeat",
-      query: "service:worker",
-      threshold: 1,
-      window_m: 10,
-      state: "ok",
-      enabled: true,
-    },
-    {
-      id: "3",
-      name: "Authentication failures spike",
-      query: "service:auth http.status:401",
-      threshold: 200,
-      window_m: 10,
-      state: "pending",
-      enabled: true,
-    },
-  ]);
+  const fetchRules = async () => {
+    try {
+      const res = await fetch("/v1/alert-rules");
+      if (res.ok) {
+        const data = await res.json();
+        setRules(data.rules || []);
+      }
+    } catch {
+      // keep local
+    }
+  };
 
-  const handleCreateRule = () => {
+  useEffect(() => {
+    fetchRules();
+  }, []);
+
+  const handleCreateRule = async () => {
     if (!newRuleName.trim() || !newRuleQuery.trim()) {
       showToast("Please provide both rule name and query", "warning");
       return;
     }
 
-    const newRule: AlertRule = {
-      id: Math.random().toString(36).substring(2, 9),
-      name: newRuleName.trim(),
-      query: newRuleQuery.trim(),
-      threshold: parseInt(newRuleThreshold, 10) || 10,
-      window_m: 5,
-      state: "ok",
-      enabled: true,
-    };
+    setLoading(true);
+    try {
+      const res = await fetch("/v1/alert-rules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_slug: "production",
+          name: newRuleName.trim(),
+          query: newRuleQuery.trim(),
+          threshold: parseFloat(newRuleThreshold) || 10,
+          window_s: 300,
+        }),
+      });
 
-    setRules((prev) => [newRule, ...prev]);
-    setIsModalOpen(false);
-    setNewRuleName("");
-    setNewRuleQuery("");
-    showToast(`Alert rule '${newRule.name}' created`, "success");
+      if (!res.ok) {
+        throw new Error("Failed to save rule");
+      }
+
+      showToast(`Alert rule '${newRuleName.trim()}' saved to database`, "success");
+      setIsModalOpen(false);
+      setNewRuleName("");
+      setNewRuleQuery("");
+      fetchRules();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error creating rule";
+      showToast(msg, "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleRule = (id: string) => {

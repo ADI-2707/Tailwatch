@@ -79,7 +79,7 @@ services:
     image: postgres:18-alpine
     environment:
       POSTGRES_USER: tailwatch
-      POSTGRES_PASSWORD: tailwatchpassword
+      POSTGRES_PASSWORD: tailwatch
       POSTGRES_DB: tailwatch
     volumes:
       - pg-data:/var/lib/postgresql

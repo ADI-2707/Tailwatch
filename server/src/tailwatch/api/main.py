@@ -22,8 +22,10 @@ def create_app() -> FastAPI:
 
     from tailwatch.api.routes.ingest import router as ingest_router
     from tailwatch.api.routes.search import router as search_router
+    from tailwatch.api.routes.histogram import router as histogram_router
     app.include_router(ingest_router)
     app.include_router(search_router)
+    app.include_router(histogram_router)
 
     return app
 

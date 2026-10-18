@@ -1,0 +1,95 @@
+.liveTailWrapper {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.controlsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.pausedDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--warning);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.terminalView {
+  flex: 1;
+  background-color: #05070a;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.streamLine {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: 1px 0;
+  white-space: nowrap;
+}
+
+.streamTs {
+  color: var(--text-muted);
+  width: 85px;
+}
+
+.streamService {
+  color: var(--accent);
+  width: 110px;
+}
+
+.streamMessage {
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+}

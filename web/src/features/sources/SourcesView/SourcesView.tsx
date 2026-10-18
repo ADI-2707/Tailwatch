@@ -15,38 +15,23 @@ export interface AgentHost {
 }
 
 export const SourcesView: React.FC = () => {
-  const hosts: AgentHost[] = [
-    {
-      id: "1",
-      name: "web-prod-01",
-      ip: "10.0.1.14",
-      version: "1.0.0",
-      spoolPercent: 12,
-      ratePerSec: 142,
-      lastSeen: "2s ago",
-      status: "ok",
-    },
-    {
-      id: "2",
-      name: "worker-batch-02",
-      ip: "10.0.2.89",
-      version: "1.0.0",
-      spoolPercent: 4,
-      ratePerSec: 68,
-      lastSeen: "1s ago",
-      status: "ok",
-    },
-    {
-      id: "3",
-      name: "db-replica-01",
-      ip: "10.0.4.10",
-      version: "1.0.0",
-      spoolPercent: 28,
-      ratePerSec: 210,
-      lastSeen: "Just now",
-      status: "ok",
-    },
-  ];
+  const [hosts, setHosts] = React.useState<AgentHost[]>([]);
+
+  React.useEffect(() => {
+    const fetchSources = async () => {
+      try {
+        const res = await fetch("/v1/sources");
+        if (res.ok) {
+          const data = await res.json();
+          setHosts(data.sources || []);
+        }
+      } catch {
+      }
+    };
+    fetchSources();
+    const interval = setInterval(fetchSources, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className={styles.sourcesWrapper}>

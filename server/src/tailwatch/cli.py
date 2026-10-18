@@ -20,7 +20,14 @@ def main():
     elif cmd == "maintenance":
         print("Starting Tailwatch Maintenance Worker...")
     elif cmd == "migrate":
-        print("Running Database Migrations...")
+        import psycopg
+        with psycopg.connect(settings.tw_database_url) as conn:
+            with open("src/tailwatch/db/schema.sql", "r") as f:
+                schema_sql = f.read()
+            with conn.cursor() as cur:
+                cur.execute(schema_sql)
+            conn.commit()
+        print("Database migrations applied successfully.")
     else:
         print(f"Unknown command: {cmd}")
         sys.exit(1)

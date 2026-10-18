@@ -20,7 +20,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    command: ["tailwatch", "api"]
+    command: ["api"]
     env_file: .env
     depends_on:
       migrate:
@@ -39,7 +39,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    command: ["tailwatch", "writer"]
+    command: ["writer"]
     env_file: .env
     depends_on:
       migrate:
@@ -53,7 +53,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    command: ["tailwatch", "migrate"]
+    command: ["migrate"]
     env_file: .env
     depends_on:
       postgres:

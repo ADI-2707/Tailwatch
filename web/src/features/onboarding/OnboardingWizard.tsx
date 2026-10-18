@@ -28,7 +28,6 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ projectSlug,
           setApiKey(data.token);
         }
       } catch {
-        // use fallback
       }
     };
     fetchKey();
@@ -47,7 +46,6 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ projectSlug,
           }
         }
       } catch {
-        // keep polling
       }
     }, 2000);
 
@@ -69,8 +67,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ projectSlug,
   -e TAILWATCH_API_KEY=${apiKey} \\
   ghcr.io/tailwatch/agent:latest`,
 
-    vercel: `// In your Vercel Next.js API or Server Action:
-await fetch("${hostUrl}/v1/ingest", {
+    vercel: `await fetch("${hostUrl}/v1/ingest", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",

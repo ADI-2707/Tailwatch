@@ -1,0 +1,104 @@
+name: tailwatch
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - web-dist:/srv:ro
+      - caddy-data:/data
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - tw-net
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: ["tailwatch", "api"]
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tw-net
+
+  writer:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: ["tailwatch", "writer"]
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+    networks:
+      - tw-net
+
+  migrate:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: ["tailwatch", "migrate"]
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - tw-net
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--appendonly", "yes", "--appendfsync", "everysec", "--maxmemory", "1gb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tw-net
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: tailwatch
+      POSTGRES_PASSWORD: tailwatchpassword
+      POSTGRES_DB: tailwatch
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./deploy/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tailwatch"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - tw-net
+
+volumes:
+  pg-data:
+  valkey-data:
+  caddy-data:
+  web-dist:
+
+networks:
+  tw-net:
+    driver: bridge

@@ -24,10 +24,12 @@ def create_app() -> FastAPI:
     from tailwatch.api.routes.search import router as search_router
     from tailwatch.api.routes.histogram import router as histogram_router
     from tailwatch.api.routes.tail import router as tail_router
+    from tailwatch.api.routes.projects import router as projects_router
     app.include_router(ingest_router)
     app.include_router(search_router)
     app.include_router(histogram_router)
     app.include_router(tail_router)
+    app.include_router(projects_router)
 
     return app
 

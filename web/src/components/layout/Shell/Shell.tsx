@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Shell.module.css";
+import { Sun, Moon } from "lucide-react";
 
 export interface ShellProps {
   children: React.ReactNode;
@@ -14,6 +15,16 @@ export const Shell: React.FC<ShellProps> = ({
   onTabChange,
   projectSlug = "default",
 }) => {
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   const tabs: Array<{ id: "logs" | "tail" | "alerts" | "sources" | "system"; label: string }> = [
     { id: "logs", label: "Logs" },
     { id: "tail", label: "Live Tail" },
@@ -50,6 +61,14 @@ export const Shell: React.FC<ShellProps> = ({
             <span>Search</span>
             <kbd>/</kbd>
           </div>
+          <button
+            className={styles.themeToggle}
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+          >
+            {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
         </div>
       </header>
       <main className={styles.content}>

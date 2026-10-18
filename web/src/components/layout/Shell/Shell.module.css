@@ -104,6 +104,27 @@
   font-family: var(--font-mono);
 }
 
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease),
+              border-color var(--duration-fast) var(--ease),
+              background-color var(--duration-fast) var(--ease);
+}
+
+.themeToggle:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
 .content {
   flex: 1;
   display: flex;

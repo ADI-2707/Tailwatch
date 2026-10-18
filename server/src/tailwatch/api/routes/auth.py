@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 import psycopg
 from fastapi import APIRouter, HTTPException, Response, Request, status, Cookie
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from tailwatch.core.config import settings
 from tailwatch.core.security import hash_password, verify_password, generate_session_token, hash_session_token
 
@@ -11,13 +11,13 @@ router = APIRouter(prefix="/v1/auth", tags=["auth"])
 
 class SetupRequest(BaseModel):
     name: str
-    email: EmailStr
+    email: str
     password: str
     project_name: str
     project_slug: str
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 @router.get("/status")

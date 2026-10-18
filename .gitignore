@@ -36,8 +36,8 @@ pkg/
 *.dylib
 *.test
 *.out
-tailwatch-agent
-tw-bench
+/tailwatch-agent
+/tw-bench
 
 .vscode/
 .idea/

@@ -1,0 +1,18 @@
+services:
+  chaos:
+    build:
+      context: ./chaos
+      dockerfile: Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["run", "--scenario", "steady", "--rate", "25", "--duration", "3600", "--url", "http://api:8000/v1/ingest", "--api-key", "twk_live_test_key_master"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - tailwatch-net
+
+networks:
+  tailwatch-net:
+    external: true
+    name: tailwatch_default

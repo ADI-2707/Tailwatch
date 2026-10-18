@@ -1,6 +1,8 @@
+import time
+from datetime import datetime, timezone
 import orjson
 import redis.asyncio as redis
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
 from tailwatch.api.deps import verify_api_key
 from tailwatch.core.config import settings
 from tailwatch.ingest.models import IngestBatchRequest
@@ -12,6 +14,7 @@ redis_client = redis.from_url(settings.tw_valkey_url, decode_responses=False)
 @router.post("/ingest", status_code=status.HTTP_202_ACCEPTED)
 async def ingest_logs(
     payload: IngestBatchRequest,
+    response: Response,
     key_hash: str = Depends(verify_api_key),
     x_tw_batch_id: str = Header(None)
 ):
@@ -19,11 +22,51 @@ async def ingest_logs(
     if not batch_id:
         raise HTTPException(status_code=400, detail="Missing batch_id")
 
+    event_count = len(payload.events)
+    now_sec = int(time.time())
+    rate_key = f"tw:rate:{key_hash}:{now_sec}"
+    
+    current_sec_count = await redis_client.incrby(rate_key, event_count)
+    if current_sec_count == event_count:
+        await redis_client.expire(rate_key, 2)
+
+    if current_sec_count > 10000:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Burst maximum is 10,000 events/sec.",
+            headers={"Retry-After": "1"}
+        )
+
+    if payload.agent and payload.agent.host:
+        host_key = f"tw:host:{payload.agent.host}"
+        r_text = redis.from_url(settings.tw_valkey_url, decode_responses=True)
+        await r_text.hset(
+            host_key,
+            mapping={
+                "host": payload.agent.host,
+                "ip": payload.agent.ip or "remote",
+                "version": payload.agent.version or "1.0.0",
+                "spool_pct": str(payload.agent.spool_percent or 0),
+                "rate": str(payload.agent.events_per_sec or event_count),
+                "last_seen": datetime.now(timezone.utc).isoformat()
+            }
+        )
+        await r_text.expire(host_key, 60)
+        await r_text.aclose()
+
+    stream_len = await redis_client.xlen("tw:ingest:stream")
+    events = payload.events
+    if stream_len > 75000:
+        filtered = [e for e in events if e.level not in ("debug", "trace")]
+        if len(filtered) < len(events):
+            response.headers["x-tw-shed"] = "debug,trace"
+            events = filtered
+
     packed_data = orjson.dumps({
         "batch_id": batch_id,
         "key_hash": key_hash,
         "agent": payload.agent.model_dump() if payload.agent else None,
-        "events": [e.model_dump(mode="json") for e in payload.events]
+        "events": [e.model_dump(mode="json") for e in events]
     })
 
     await redis_client.xadd(
@@ -36,5 +79,5 @@ async def ingest_logs(
     return {
         "status": "accepted",
         "batch_id": batch_id,
-        "count": len(payload.events)
+        "count": len(events)
     }

@@ -1,0 +1,118 @@
+.alertsWrapper {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statsText {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.rulesList {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ruleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.ruleRow:last-child {
+  border-bottom: none;
+}
+
+.ruleRow:hover {
+  background-color: var(--surface-raised);
+}
+
+.ruleMain {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.ruleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ruleName {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ruleCondition {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ruleActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 12, 16, 0.7);
+  backdrop-filter: blur(2px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: 520px;
+  max-width: 90vw;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

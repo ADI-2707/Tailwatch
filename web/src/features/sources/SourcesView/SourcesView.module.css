@@ -1,0 +1,80 @@
+.sourcesWrapper {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statsText {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.tableWrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--surface-raised);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.row {
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.row:hover {
+  background-color: var(--surface-raised);
+}
+
+.cell {
+  padding: var(--space-3) var(--space-4);
+  vertical-align: middle;
+}
+
+.hostGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.spoolFillBar {
+  width: 120px;
+  height: 6px;
+  background-color: var(--surface-raised);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  display: flex;
+}
+
+.spoolProgress {
+  height: 100%;
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+}

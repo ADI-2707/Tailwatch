@@ -3,6 +3,7 @@ import { Shell } from "./components/layout/Shell/Shell";
 import { LogsExplorer } from "./features/logs/LogsExplorer/LogsExplorer";
 import { LiveTail } from "./features/tail/LiveTail/LiveTail";
 import { AlertsView } from "./features/alerts/AlertsView/AlertsView";
+import { SourcesView } from "./features/sources/SourcesView/SourcesView";
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<"logs" | "tail" | "alerts" | "sources" | "system">("logs");
@@ -12,7 +13,8 @@ export const App: React.FC = () => {
       {currentTab === "logs" && <LogsExplorer />}
       {currentTab === "tail" && <LiveTail />}
       {currentTab === "alerts" && <AlertsView />}
-      {currentTab !== "logs" && currentTab !== "tail" && currentTab !== "alerts" && (
+      {currentTab === "sources" && <SourcesView />}
+      {currentTab !== "logs" && currentTab !== "tail" && currentTab !== "alerts" && currentTab !== "sources" && (
         <div style={{ padding: "var(--space-8)", color: "var(--text-muted)", textAlign: "center" }}>
           <span>Feature {currentTab} view coming up</span>
         </div>

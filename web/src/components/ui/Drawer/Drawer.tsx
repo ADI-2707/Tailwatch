@@ -4,6 +4,7 @@ import { X, Copy } from "lucide-react";
 import { Button } from "../Button/Button";
 import { LevelPill } from "../LevelPill/LevelPill";
 import { LogEntry } from "../../../features/logs/LogsExplorer/LogsExplorer";
+import { useToast } from "../Toast/Toast";
 
 export interface DrawerProps {
   log: LogEntry | null;
@@ -16,6 +17,8 @@ export const Drawer: React.FC<DrawerProps> = ({
   onClose,
   onFilterByService,
 }) => {
+  const { showToast } = useToast();
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -30,6 +33,7 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    showToast("Event JSON copied to clipboard", "success");
   };
 
   return (

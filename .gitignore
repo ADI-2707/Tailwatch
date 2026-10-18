@@ -27,8 +27,8 @@ coverage.xml
 .mypy_cache/
 .ruff_cache/
 
-bin/
-pkg/
+/bin/
+/pkg/
 *.exe
 *.exe~
 *.dll

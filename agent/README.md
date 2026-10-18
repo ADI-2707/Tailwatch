@@ -2,6 +2,30 @@
 
 A high-performance, single-binary log collection agent written in Go. Tailwatch Agent runs with a memory footprint under 15 MiB, tails container logs and raw log files, redacts sensitive secrets at the edge, aggregates multiline stack traces, and spools unacknowledged batches to disk in segments with CRC32C checksums during network partitions.
 
+## Pipeline Architecture
+
+```mermaid
+graph TD
+    subgraph Discovery [Log Collectors]
+        DS[/var/run/docker.sock] -->|Container Stdout/Stderr| DCOL[Docker Collector]
+        FL[/var/log/*.log] -->|Inode Follower| FCOL[File Tailer]
+    end
+
+    subgraph Processing [Edge Processing Pipeline]
+        DCOL --> MJ[Multiline Joiner]
+        FCOL --> MJ
+        MJ -->|Aggregated Events| MSK[RE2 Secret Masker]
+        MSK -->|Redacted Payloads| Q[In-Memory Ring Buffer]
+    end
+
+    subgraph Resilience [Storage & Transport]
+        Q -->|Flush Trigger: 250 events or 1000ms| DSP[Batch Dispatcher]
+        DSP -->|Normal Path: HTTP/2 POST| SVR[Tailwatch Ingestion Server]
+        DSP -.->|On Network Failure| SPL[(16 MiB Segment Disk Spool)]
+        SPL -.->|On Network Recovery| SVR
+    end
+```
+
 ## Features
 
 - **Docker Socket Engine**: Automatically discovers running containers via `/var/run/docker.sock`, reads stdout/stderr streams, and enriches events with container metadata.
@@ -10,6 +34,34 @@ A high-performance, single-binary log collection agent written in Go. Tailwatch 
 - **Multiline Joiner**: Groups related stack trace lines and indented runtime exceptions into a single structured event.
 - **Disk Spool (WAL)**: 16 MiB fixed segment spooling with CRC32C integrity validation ensures zero log loss across prolonged server downtime or network disconnects.
 - **Batch Pipeline**: Ships compressed microbatches over HTTP/2 or HTTP/1.1 with jittered exponential backoff.
+
+## Project Structure
+
+```
+agent/
+├── cmd/
+│   └── agent/
+│       └── main.go               # CLI entrypoint (Cobra commands: run, check, version)
+├── pkg/
+│   ├── config/
+│   │   └── config.go             # YAML parser, validation, and env interpolation
+│   ├── discovery/
+│   │   └── docker.go             # Docker engine socket stream reader
+│   ├── tailer/
+│   │   ├── file.go               # Inode-following file reader and rotation monitor
+│   │   └── multiline.go          # Regex multiline stack trace grouping engine
+│   ├── masking/
+│   │   └── masker.go             # RE2 compiled secret redaction filters
+│   ├── spool/
+│   │   └── spool.go              # 16 MiB segment disk spooler with CRC32C checks
+│   ├── pipeline/
+│   │   └── runner.go             # Concurrent collector, worker, and flush loop
+│   └── sender/
+│       └── client.go             # HTTP batch client with jitter backoff
+├── go.mod                        # Go module dependencies
+├── go.sum                        # Cryptographic checksums
+└── README.md                     # Agent technical guide
+```
 
 ## Configuration
 

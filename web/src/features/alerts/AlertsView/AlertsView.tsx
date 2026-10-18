@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./AlertsView.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { Input } from "../../../components/ui/Input/Input";
@@ -33,7 +33,6 @@ export const AlertsView: React.FC = () => {
         setRules(data.rules || []);
       }
     } catch {
-      // keep local
     }
   };
 
@@ -170,7 +169,7 @@ export const AlertsView: React.FC = () => {
               <Button size="sm" variant="ghost" onClick={() => setIsModalOpen(false)}>
                 Cancel
               </Button>
-              <Button size="sm" variant="primary" onClick={handleCreateRule}>
+              <Button size="sm" variant="primary" loading={loading} onClick={handleCreateRule}>
                 Save Rule
               </Button>
             </div>

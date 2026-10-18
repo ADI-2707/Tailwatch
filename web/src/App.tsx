@@ -21,7 +21,7 @@ interface AuthStatus {
 export const App: React.FC = () => {
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
   const [currentTab, setCurrentTab] = useState<ShellTab>("logs");
-  const [projectSlug, setProjectSlug] = useState<string>("production");
+  const [projectSlug] = useState<string>("production");
 
   const checkAuth = async () => {
     try {

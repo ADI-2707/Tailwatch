@@ -20,6 +20,9 @@ def create_app() -> FastAPI:
     def ready():
         return {"status": "ready"}
 
+    from tailwatch.api.routes.ingest import router as ingest_router
+    app.include_router(ingest_router)
+
     return app
 
 app = create_app()

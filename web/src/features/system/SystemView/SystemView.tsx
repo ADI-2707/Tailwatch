@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./SystemView.module.css";
-import { Database, HardDrive, Cpu, Activity, Clock } from "lucide-react";
+import { Database, HardDrive, Activity, Clock } from "lucide-react";
 import { StatusChip } from "../../../components/ui/StatusChip/StatusChip";
 
 export const SystemView: React.FC = () => {

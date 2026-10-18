@@ -11,7 +11,8 @@ def main():
     if cmd == "api":
         uvicorn.run("tailwatch.api.main:app", host="0.0.0.0", port=8000, reload=False)
     elif cmd == "writer":
-        print("Starting Tailwatch Writer Worker...")
+        from tailwatch.writer.consumer import start
+        start()
     elif cmd == "alerter":
         print("Starting Tailwatch Alerter Worker...")
     elif cmd == "notifier":

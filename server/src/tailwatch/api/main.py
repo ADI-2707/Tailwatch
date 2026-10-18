@@ -27,6 +27,7 @@ def create_app() -> FastAPI:
     from tailwatch.api.routes.projects import router as projects_router
     from tailwatch.api.routes.auth import router as auth_router
     from tailwatch.api.routes.alerts import router as alerts_router
+    from tailwatch.api.routes.telemetry import router as telemetry_router
     app.include_router(ingest_router)
     app.include_router(search_router)
     app.include_router(histogram_router)
@@ -34,6 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(projects_router)
     app.include_router(auth_router)
     app.include_router(alerts_router)
+    app.include_router(telemetry_router)
 
     return app
 

@@ -54,13 +54,24 @@ class QueryCompiler:
     def _parse_term(self) -> str:
         tok = self._advance()
 
-        if self._current().type in (TokenType.COLON, TokenType.NOT_EQUAL, TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL, TokenType.TILDE):
+        if self._current().type == TokenType.COLON:
+            colon_tok = self._advance()
+            if self._current().type in (TokenType.NOT_EQUAL, TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL, TokenType.TILDE):
+                op_tok = self._advance()
+            else:
+                op_tok = colon_tok
+            val_tok = self._advance()
+
+            field_name = tok.value.lower()
+            val = val_tok.value
+            return self._build_field_clause(field_name, op_tok.value, val)
+
+        if self._current().type in (TokenType.NOT_EQUAL, TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL, TokenType.TILDE):
             op_tok = self._advance()
             val_tok = self._advance()
 
             field_name = tok.value.lower()
             val = val_tok.value
-
             return self._build_field_clause(field_name, op_tok.value, val)
 
         self.params.append(f"%{tok.value}%")

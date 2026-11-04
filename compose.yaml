@@ -61,6 +61,22 @@ services:
     networks:
       - tw-net
 
+  worker:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: ["worker"]
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    networks:
+      - tw-net
+
   migrate:
     build:
       context: ./server

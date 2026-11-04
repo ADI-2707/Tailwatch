@@ -71,6 +71,9 @@ class QueryCompiler:
         if op == ":":
             sql_op = "="
 
+        if field.startswith("fields."):
+            field = field[7:]
+
         if field == "service":
             self.params.append(value)
             return f"service {sql_op} ${len(self.params)}"

@@ -56,6 +56,9 @@ class Lexer:
         if ch == ':':
             self.pos += 1
             return Token(TokenType.COLON, ":", start)
+        if ch == '=':
+            self.pos += 1
+            return Token(TokenType.COLON, "=", start)
         if ch == '~':
             self.pos += 1
             return Token(TokenType.TILDE, "~", start)
@@ -103,7 +106,7 @@ class Lexer:
         word_chars = []
         while self.pos < self.len:
             ch = self.text[self.pos]
-            if ch.isspace() or ch in ('(', ')', ':', '~'):
+            if ch.isspace() or ch in ('(', ')', ':', '=', '~', '<', '>'):
                 break
             word_chars.append(ch)
             self.pos += 1

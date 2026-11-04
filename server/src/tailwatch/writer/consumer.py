@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+import traceback
 from datetime import datetime, timezone
 import orjson
 import psycopg
@@ -40,7 +41,7 @@ async def run_writer():
     except Exception:
         pass
 
-    async with await psycopg.AsyncConnection.connect(settings.tw_database_url) as conn:
+    async with await psycopg.AsyncConnection.connect(settings.tw_database_url, autocommit=True) as conn:
         await ensure_daily_partition(conn, datetime.now(timezone.utc))
 
         while True:
@@ -48,17 +49,28 @@ async def run_writer():
                 entries = await r.xreadgroup(
                     groupname=group_name,
                     consumername=consumer_name,
-                    streams={stream_name: ">"},
-                    count=10,
-                    block=1000
+                    streams={stream_name: "0"},
+                    count=100
                 )
-                if not entries:
+                if not entries or not entries[0][1]:
+                    entries = await r.xreadgroup(
+                        groupname=group_name,
+                        consumername=consumer_name,
+                        streams={stream_name: ">"},
+                        count=100,
+                        block=1000
+                    )
+                if not entries or not entries[0][1]:
                     continue
 
                 for stream, msg_list in entries:
                     for msg_id, data in msg_list:
                         payload = orjson.loads(data[b"payload"])
-                        batch_id = uuid.UUID(payload["batch_id"])
+                        raw_batch_id = payload.get("batch_id")
+                        try:
+                            batch_id = uuid.UUID(str(raw_batch_id))
+                        except Exception:
+                            batch_id = uuid.uuid5(uuid.NAMESPACE_DNS, str(raw_batch_id))
                         events = payload.get("events", [])
 
                         async with conn.transaction():
@@ -81,7 +93,8 @@ async def run_writer():
                                             ts = e["ts"]
                                             lvl = LEVEL_NUM_MAP.get(str(e.get("level", "info")).lower(), 30)
                                             service = e.get("service", "unknown")
-                                            host = e.get("host") or (payload.get("agent", {}) or {}).get("host", "unknown")
+                                            agent_info = payload.get("agent") or {}
+                                            host = e.get("host") or agent_info.get("host", "unknown")
                                             source = e.get("source", "")
                                             msg = e.get("message", "")
                                             fields_json = orjson.dumps(e.get("fields", {})).decode()
@@ -101,6 +114,7 @@ async def run_writer():
 
                         await r.xack(stream_name, group_name, msg_id)
             except Exception as ex:
+                traceback.print_exc()
                 await asyncio.sleep(1)
 
 def start():

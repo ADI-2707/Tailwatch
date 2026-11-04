@@ -44,10 +44,10 @@ async def ingest_logs(
             host_key,
             mapping={
                 "host": payload.agent.host,
-                "ip": payload.agent.ip or "remote",
-                "version": payload.agent.version or "1.0.0",
-                "spool_pct": str(payload.agent.spool_percent or 0),
-                "rate": str(payload.agent.events_per_sec or event_count),
+                "ip": getattr(payload.agent, "ip", None) or "remote",
+                "version": getattr(payload.agent, "version", None) or "1.0.0",
+                "spool_pct": str(getattr(payload.agent, "spool_percent", None) or 0),
+                "rate": str(getattr(payload.agent, "events_per_sec", None) or event_count),
                 "last_seen": datetime.now(timezone.utc).isoformat()
             }
         )
@@ -75,6 +75,12 @@ async def ingest_logs(
         maxlen=100000,
         approximate=True
     )
+
+    for e in events:
+        await redis_client.publish(
+            "tw:channel:tail",
+            orjson.dumps(e.model_dump(mode="json")).decode()
+        )
 
     return {
         "status": "accepted",

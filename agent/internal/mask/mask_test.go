@@ -60,3 +60,4 @@ func TestMaskFields(t *testing.T) {
 		t.Errorf("expected service to be billing, got %v", masked["service"])
 	}
 }
+

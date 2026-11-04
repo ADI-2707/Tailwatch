@@ -84,3 +84,4 @@ func TestSpoolRotationAndListing(t *testing.T) {
 		t.Errorf("expected 0 remaining, got %d", len(remaining))
 	}
 }
+

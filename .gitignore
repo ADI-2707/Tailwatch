@@ -45,3 +45,4 @@ coverage.xml
 *.sublime-workspace
 .DS_Store
 Thumbs.db
+*.db

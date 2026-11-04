@@ -19,7 +19,7 @@ class Alerter:
     async def run(self):
         while True:
             try:
-                async with await psycopg.AsyncConnection.connect(settings.tw_database_url) as conn:
+                async with await psycopg.AsyncConnection.connect(settings.tw_database_url, autocommit=True) as conn:
                     async with conn.cursor() as cur:
                         await cur.execute("SELECT pg_try_advisory_lock(%s);", (self.lock_key,))
                         row = await cur.fetchone()
@@ -112,8 +112,6 @@ class Alerter:
                                 INSERT INTO notifications (incident_id, channel_id, kind, payload, status)
                                 VALUES (gen_random_uuid(), %s, %s, %s, 'pending');
                             """, (ch_id, next_state, f'{{"rule": "{rule_name}", "state": "{next_state}", "value": {val}}}'))
-
-                    await conn.commit()
 
 def start():
     alerter = Alerter()

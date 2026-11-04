@@ -15,7 +15,10 @@ class LogEvent(BaseModel):
 
 class AgentMetadata(BaseModel):
     host: str
-    version: str
+    version: str = "1.0.0"
+    ip: Optional[str] = None
+    spool_percent: Optional[float] = None
+    events_per_sec: Optional[float] = None
 
 class IngestBatchRequest(BaseModel):
     batch_id: str

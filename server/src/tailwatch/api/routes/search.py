@@ -10,6 +10,7 @@ router = APIRouter(prefix="/v1", tags=["logs"])
 @router.get("/logs")
 async def search_logs(
     q: Optional[str] = None,
+    tql: Optional[str] = None,
     limit: int = Query(default=100, le=1000),
     cursor_ts: Optional[str] = None,
     cursor_id: Optional[int] = None
@@ -20,8 +21,9 @@ async def search_logs(
     where_clauses = ["ts >= %s", "ts <= %s"]
     params: List[object] = [from_time, now]
 
-    if q and q.strip():
-        compiler = QueryCompiler(q.strip())
+    query_str = (q or tql or "").strip()
+    if query_str:
+        compiler = QueryCompiler(query_str)
         sql_clause, comp_params = compiler.compile()
         sql_clause_py = sql_clause
         for idx in range(len(comp_params), 0, -1):

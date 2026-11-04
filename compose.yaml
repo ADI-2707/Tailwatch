@@ -29,6 +29,7 @@ services:
       - tw-net
 
   api:
+    image: tailwatch-server:latest
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -48,6 +49,7 @@ services:
       - tw-net
 
   writer:
+    image: tailwatch-server:latest
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -62,6 +64,7 @@ services:
       - tw-net
 
   worker:
+    image: tailwatch-server:latest
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -78,6 +81,7 @@ services:
       - tw-net
 
   migrate:
+    image: tailwatch-server:latest
     build:
       context: ./server
       dockerfile: Dockerfile

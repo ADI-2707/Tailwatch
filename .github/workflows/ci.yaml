@@ -53,3 +53,4 @@ jobs:
           cd web
           npm ci
           npm run build
+

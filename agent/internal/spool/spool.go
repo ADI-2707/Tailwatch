@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 )
 
@@ -60,6 +61,12 @@ func (s *Spool) rotateSegment() error {
 	return nil
 }
 
+func (s *Spool) RotateNow() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.rotateSegment()
+}
+
 func (s *Spool) Append(payload []byte) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -87,6 +94,38 @@ func (s *Spool) Append(payload []byte) error {
 
 	s.currentSize += totalLen
 	return s.currentFile.Sync()
+}
+
+func (s *Spool) ListOldSegments() ([]string, error) {
+	s.mu.Lock()
+	currentName := ""
+	if s.currentFile != nil {
+		currentName = filepath.Base(s.currentFile.Name())
+	}
+	s.mu.Unlock()
+
+	files, err := os.ReadDir(s.dir)
+	if err != nil {
+		return nil, err
+	}
+
+	var segments []string
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		name := f.Name()
+		if filepath.Ext(name) == ".log" && name != currentName {
+			segments = append(segments, filepath.Join(s.dir, name))
+		}
+	}
+
+	sort.Strings(segments)
+	return segments, nil
+}
+
+func (s *Spool) RemoveSegment(filePath string) error {
+	return os.Remove(filePath)
 }
 
 func ReadRecords(filePath string) ([][]byte, error) {

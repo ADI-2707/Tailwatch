@@ -3,6 +3,8 @@ import styles from "./LogsExplorer.module.css";
 import { Input } from "../../../components/ui/Input/Input";
 import { Button } from "../../../components/ui/Button/Button";
 import { LevelPill } from "../../../components/ui/LevelPill/LevelPill";
+import { Histogram, HistogramBucket } from "../../../components/ui/Histogram/Histogram";
+import { Drawer } from "../../../components/ui/Drawer/Drawer";
 
 export interface LogEntry {
   id: string;
@@ -19,14 +21,17 @@ export interface LogEntry {
 export const LogsExplorer: React.FC = () => {
   const [query, setQuery] = useState("");
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [buckets, setBuckets] = useState<HistogramBucket[]>([]);
+  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchLogs = async () => {
+  const fetchLogs = async (overrideQuery?: string) => {
     setLoading(true);
+    const activeQuery = overrideQuery !== undefined ? overrideQuery : query;
     try {
       const url = new URL("/v1/logs", window.location.origin);
-      if (query.trim()) {
-        url.searchParams.set("q", query.trim());
+      if (activeQuery.trim()) {
+        url.searchParams.set("q", activeQuery.trim());
       }
       const res = await fetch(url.toString());
       if (res.ok) {
@@ -40,9 +45,29 @@ export const LogsExplorer: React.FC = () => {
     }
   };
 
+  const fetchHistogram = async () => {
+    try {
+      const res = await fetch("/v1/logs/histogram?hours=24&step_minutes=15");
+      if (res.ok) {
+        const data = await res.json();
+        setBuckets(data.buckets || []);
+      }
+    } catch {
+      setBuckets([]);
+    }
+  };
+
   useEffect(() => {
     fetchLogs();
+    fetchHistogram();
   }, []);
+
+  const handleFilterByService = (service: string) => {
+    const nextQ = `service:${service}`;
+    setQuery(nextQ);
+    setSelectedLog(null);
+    fetchLogs(nextQ);
+  };
 
   const formatTimestamp = (iso: string) => {
     try {
@@ -63,10 +88,23 @@ export const LogsExplorer: React.FC = () => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchLogs()}
         />
-        <Button variant="primary" loading={loading} onClick={fetchLogs}>
+        <Button variant="primary" loading={loading} onClick={() => fetchLogs()}>
           Search
         </Button>
       </div>
+
+      {buckets.length > 0 && (
+        <Histogram
+          buckets={buckets}
+          onRangeSelect={(startIdx, endIdx) => {
+            const startBucket = buckets[startIdx];
+            const endBucket = buckets[endIdx];
+            if (startBucket && endBucket) {
+              fetchLogs();
+            }
+          }}
+        />
+      )}
 
       <div className={styles.statsBar}>
         <span>{logs.length} events loaded</span>
@@ -93,7 +131,12 @@ export const LogsExplorer: React.FC = () => {
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className={styles.row}>
+                <tr
+                  key={log.id}
+                  className={styles.row}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setSelectedLog(log)}
+                >
                   <td className={`${styles.cell} ${styles.cellTime}`}>{formatTimestamp(log.ts)}</td>
                   <td className={`${styles.cell} ${styles.cellLevel}`}>
                     <LevelPill level={log.level} />
@@ -106,6 +149,12 @@ export const LogsExplorer: React.FC = () => {
           </table>
         )}
       </div>
+
+      <Drawer
+        log={selectedLog}
+        onClose={() => setSelectedLog(null)}
+        onFilterByService={handleFilterByService}
+      />
     </div>
   );
 };

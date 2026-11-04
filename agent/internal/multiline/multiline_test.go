@@ -38,3 +38,4 @@ func TestMultilineJoinerPythonTraceback(t *testing.T) {
 		t.Errorf("expected joined traceback in first message, got: %s", flushed[0])
 	}
 }
+

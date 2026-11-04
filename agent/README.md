@@ -1,153 +1,163 @@
 # Tailwatch Agent
 
-A high-performance, single-binary log collection agent written in Go. Tailwatch Agent runs with a memory footprint under 15 MiB, tails container logs and raw log files, redacts sensitive secrets at the edge, aggregates multiline stack traces, and spools unacknowledged batches to disk in segments with CRC32C checksums during network partitions.
+A high-performance, single-binary log collection agent written in Go. The Tailwatch Agent operates with a memory footprint under 15 MiB, tails container logs and raw log files, redacts sensitive secrets and PII at the edge, aggregates multiline stack traces, and spools unacknowledged batches to disk in 16 MiB segments with CRC32C checksums during network partitions.
 
-## Pipeline Architecture
+---
+
+## 1. Architecture & Data Flow
 
 ```mermaid
 graph TD
     subgraph Discovery [Log Collectors]
         DS[/var/run/docker.sock] -->|Container Stdout/Stderr| DCOL[Docker Collector]
-        FL[/var/log/*.log] -->|Inode Follower| FCOL[File Tailer]
+        FL[/var/log/*.log] -->|Inode-Tracking Follower| FCOL[File Tailer]
     end
 
     subgraph Processing [Edge Processing Pipeline]
-        DCOL --> MJ[Multiline Joiner]
+        DCOL --> MJ[Multiline Joiner: ISO8601 & Stack Traces]
         FCOL --> MJ
-        MJ -->|Aggregated Events| MSK[RE2 Secret Masker]
-        MSK -->|Redacted Payloads| Q[In-Memory Ring Buffer]
+        MJ -->|Joined Raw Lines| MSK[RE2 Secret Masker: JWT, AWS, PII]
+        MSK -->|Sanitized LogEvent Structs| CH[In-Memory Buffer Channel: 2,000 slots]
     end
 
-    subgraph Resilience [Storage & Transport]
-        Q -->|Flush Trigger: 250 events or 1000ms| DSP[Batch Dispatcher]
-        DSP -->|Normal Path: HTTP/2 POST| SVR[Tailwatch Ingestion Server]
-        DSP -.->|On Network Failure| SPL[(16 MiB Segment Disk Spool)]
-        SPL -.->|On Network Recovery| SVR
+    subgraph Transport [Batching, Spooling & Egress]
+        CH --> FLUSH{Trigger: 250 Events or 1,000ms}
+        FLUSH --> WAL[(16 MiB Segment Disk Spool: CRC32C)]
+        FLUSH --> HTTP[HTTP/2 Sender Client: /v1/ingest]
+        HTTP -->|202 Accepted| OK[Batch Acknowledged]
+        HTTP -->|Network Failure / 5xx| ROT[Rotate Spool Segment]
+        ROT --> REC[Background Spool Replay Loop]
+        REC -->|Read Closed Segments| HTTP
     end
 ```
 
-## Features
+---
 
-- **Docker Socket Engine**: Automatically discovers running containers via `/var/run/docker.sock`, reads stdout/stderr streams, and enriches events with container metadata.
-- **File System Tailer**: Follows rotating log files via inode tracking and file truncation detection.
-- **Edge Secret Masking**: RE2-accelerated regular expression replacement masks private keys, JWT tokens, AWS credentials, and authorization headers before transmission.
-- **Multiline Joiner**: Groups related stack trace lines and indented runtime exceptions into a single structured event.
-- **Disk Spool (WAL)**: 16 MiB fixed segment spooling with CRC32C integrity validation ensures zero log loss across prolonged server downtime or network disconnects.
-- **Batch Pipeline**: Ships compressed microbatches over HTTP/2 or HTTP/1.1 with jittered exponential backoff.
+## 2. Component Breakdown: What Each File Does
 
-## Project Structure
+| Path | Component | Responsibility |
+| :--- | :--- | :--- |
+| `cmd/tailwatch-agent/main.go` | **CLI Entrypoint** | Cobra-powered CLI supporting `run` (foreground agent daemon) and `version` commands with OS signal termination (`SIGINT`, `SIGTERM`). |
+| `internal/config/config.go` | **Config Parser** | Loads YAML configuration files with dynamic `${ENV_VAR}` expansion, validating server endpoints, host identifiers, and buffer limits. |
+| `internal/mask/mask.go` | **RE2 Secret Redaction** | High-speed regular expression masker redacting JWT tokens, AWS keys (`AKIA...`), Bearer headers, private keys, credit cards, and sensitive map fields. |
+| `internal/multiline/multiline.go` | **Multiline Aggregator** | Buffers indented exception stack traces and multi-line errors (e.g. Python tracebacks, Go panics, Java errors) into unified single events. |
+| `internal/pipeline/runner.go` | **Pipeline Coordinator** | Coordinates collectors, in-memory buffering, periodic batch flushing, secret redaction, and background WAL spool playback routines. |
+| `internal/sender/sender.go` | **HTTP Transport** | Sends compressed JSON batches to the Tailwatch server `/v1/ingest` endpoint with jittered exponential backoff and timeout controls. |
+| `internal/source/docker/collector.go` | **Docker Collector** | Connects to `/var/run/docker.sock` to tail multiplexed stdout and stderr streams of running containers in real time. |
+| `internal/source/file/tailer.go` | **File Tailer** | Scans log file paths, tracks read offsets and file inodes, and streams new lines as they are appended to disk. |
+| `internal/spool/spool.go` | **Disk WAL Spooler** | Append-only write-ahead log splitting data into 16 MiB segment files with BigEndian length headers and CRC32C integrity checksums. |
+| `pkg/protocol/types.go` | **Wire Schemas** | Core Go data structures defining `LogEvent`, `IngestBatch`, and `AgentMetadata` matching the backend API contract. |
+
+---
+
+## 3. Offline Spool Replay & Durability Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as Application Logs
+    participant Runner as Agent Runner
+    participant Spool as Disk Spool (WAL)
+    participant Server as Tailwatch Server (:80)
+
+    App->>Runner: Emits log events
+    Runner->>Spool: Append batch payload (length + CRC32C + data)
+    Runner->>Server: POST /v1/ingest
+    alt Network Healthy
+        Server-->>Runner: 202 Accepted
+    else Network Drop / Server Unreachable
+        Server--xRunner: Connection Failed
+        Runner->>Spool: RotateNow() -> Seals segment-00000001.log
+        loop Every 5 Seconds (Recovery Loop)
+            Runner->>Spool: ListOldSegments()
+            Runner->>Spool: ReadRecords(segmentPath)
+            Runner->>Server: POST /v1/ingest (Replay batch)
+            alt Delivery Succeeded
+                Server-->>Runner: 202 Accepted
+                Runner->>Spool: RemoveSegment(segmentPath)
+            else Still Down
+                Note over Runner: Retain segment on disk, back off
+            end
+        end
+    end
+```
+
+---
+
+## 4. Project Directory Tree
 
 ```
 agent/
 ├── cmd/
-│   └── agent/
-│       └── main.go               # CLI entrypoint (Cobra commands: run, check, version)
-├── pkg/
+│   └── tailwatch-agent/
+│       └── main.go               # Cobra CLI entrypoint (run, version)
+├── internal/
 │   ├── config/
-│   │   └── config.go             # YAML parser, validation, and env interpolation
-│   ├── discovery/
-│   │   └── docker.go             # Docker engine socket stream reader
-│   ├── tailer/
-│   │   ├── file.go               # Inode-following file reader and rotation monitor
-│   │   └── multiline.go          # Regex multiline stack trace grouping engine
-│   ├── masking/
-│   │   └── masker.go             # RE2 compiled secret redaction filters
-│   ├── spool/
-│   │   └── spool.go              # 16 MiB segment disk spooler with CRC32C checks
+│   │   └── config.go             # YAML parser and environment interpolation
+│   ├── mask/
+│   │   ├── mask.go               # RE2 secret redaction engine
+│   │   └── mask_test.go          # Redaction unit tests (JWT, AWS, PII)
+│   ├── multiline/
+│   │   ├── multiline.go          # Stack trace joining and grouping engine
+│   │   └── multiline_test.go     # ISO8601 & traceback test suite
 │   ├── pipeline/
-│   │   └── runner.go             # Concurrent collector, worker, and flush loop
-│   └── sender/
-│       └── client.go             # HTTP batch client with jitter backoff
-├── go.mod                        # Go module dependencies
-├── go.sum                        # Cryptographic checksums
-└── README.md                     # Agent technical guide
+│   │   └── runner.go             # In-memory channel buffer & spool replay loop
+│   ├── sender/
+│   │   └── sender.go             # HTTP batch client with exponential backoff
+│   ├── source/
+│   │   ├── docker/
+│   │   │   └── collector.go      # Docker socket stream collector
+│   │   └── file/
+│   │       └── tailer.go         # Inode file reader and offset tracker
+│   └── spool/
+│       ├── spool.go              # 16 MiB segment disk spooler with CRC32C
+│       └── spool_test.go         # Append, rotation, and recovery tests
+├── pkg/
+│   └── protocol/
+│       └── types.go              # Shared Go wire schemas
+├── go.mod                        # Go module definition
+├── go.sum                        # Cryptographic dependency checksums
+└── README.md                     # Technical reference manual
 ```
 
-## Configuration
+---
 
-The agent reads configuration from `/etc/tailwatch/agent.yaml` or a path supplied via the `--config` flag. Environment variables formatted as `${VAR_NAME}` are expanded dynamically at load time.
+## 5. Configuration Reference
 
 ```yaml
 server:
-  url: "${TAILWATCH_URL}"
-  api_key: "${TAILWATCH_API_KEY}"
-  batch_size: 250
-  flush_interval_ms: 1000
+  url: "http://localhost/v1/ingest"
+  api_key: "twk_live_test_key_master"
+  insecure: false
 
 host:
-  name: "${HOST_NAME}"
+  name: "prod-node-01"
+
+batch:
+  max_events: 250
+  max_age: 1s
 
 spool:
-  directory: "/var/lib/tailwatch/spool"
+  dir: "/var/lib/tailwatch/spool"
   max_size_mb: 512
-  segment_size_mb: 16
-
-masking:
-  enabled: true
-  rules:
-    - name: "bearer-token"
-      pattern: 'Bearer\s+[A-Za-z0-9\-_\.=]+'
-      replacement: "Bearer [REDACTED]"
-    - name: "api-key"
-      pattern: '(?i)(api[_-]?key|secret)\s*[:=]\s*["'']?[A-Za-z0-9\-_\.]{16,}["'']?'
-      replacement: "$1: [REDACTED]"
 
 sources:
-  - type: "docker"
-    enabled: true
-    socket_path: "/var/run/docker.sock"
-    labels:
-      environment: "production"
-    exclude_containers:
-      - "tailwatch-caddy-1"
-      - "tailwatch-agent"
-
   - type: "file"
-    enabled: true
+    service: "nginx"
     paths:
-      - "/var/log/syslog"
       - "/var/log/nginx/*.log"
-    service_name: "host-system"
-    multiline:
-      pattern: '^\d{4}-\d{2}-\d{2}'
-      negate: true
 ```
 
-## Running with Docker
+---
 
-Deploy the agent to collect logs across all containers on a host:
+## 6. Build and Verification
 
+### Build Binary
 ```bash
-docker run -d \
-  --name tailwatch-agent \
-  --restart always \
-  -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /var/log:/var/log:ro \
-  -v /var/lib/tailwatch:/var/lib/tailwatch \
-  -e TAILWATCH_URL="http://tailwatch.internal" \
-  -e TAILWATCH_API_KEY="twk_live_prod_abc123" \
-  ghcr.io/adi-2707/tailwatch-agent:latest
+go build -o tailwatch-agent ./cmd/tailwatch-agent
 ```
 
-## Building from Source
-
-### Requirements
-- Go 1.22 or higher
-- Make or standard Go toolchain
-
-### Build Commands
-
+### Run Unit Tests
 ```bash
-cd agent
-go build -ldflags="-s -w" -o bin/tailwatch-agent ./cmd/agent
-```
-
-Run the binary:
-```bash
-./bin/tailwatch-agent run --config ./agent.yaml
-```
-
-Check configuration validity without starting:
-```bash
-./bin/tailwatch-agent check --config ./agent.yaml
+go test -v ./...
 ```

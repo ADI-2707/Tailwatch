@@ -1,137 +1,96 @@
 # Tailwatch Chaos Suite
 
-A synthetic microservices traffic generator, fault injection engine, and verification harness designed to stress-test Tailwatch under realistic production loads and failure conditions.
+A microservices traffic simulation engine, failure scenario injector, and independent audit ledger designed to stress-test Tailwatch under high-concurrency loads and verify zero-loss log ingestion.
 
-## Architecture & Verification Flow
+---
+
+## 1. Simulation & Verification Flow
 
 ```mermaid
 graph TD
-    subgraph Simulation [Microservice Chaos Generator]
-        SCN[Scenario Trigger: steady, spike, payment-outage, database-slowdown, auth-attack]
-        GEN[Event Generator: 5 Services, Trace Context & UUIDs]
-        SCN --> GEN
+    subgraph Injection [Traffic & Fault Generation]
+        CTL[chaosctl.py run] --> SCEN{Scenario: steady, spike, payment-outage, database-slowdown, auth-attack}
+        SCEN --> GEN[generator.py: Multi-Tier Microservice Telemetry]
     end
 
-    subgraph Audit [Independent Local Ledger]
-        GEN -->|1. Record All Dispatched Events| LEDGER[(chaos_ledger.db: SQLite Audit Ledger)]
+    subgraph DoubleWrite [Double-Write Audit Pipeline]
+        GEN -->|1. Record Dispatched UUIDs| LEDGER[(chaos_ledger.db: SQLite Audit Ledger)]
+        GEN -->|2. HTTP POST Ingest Batches| CADDY[Caddy Proxy :80]
     end
 
-    subgraph Platform [Tailwatch Under Test]
-        GEN -->|2. Transmit HTTP Ingest Batches| ING[Tailwatch Ingestion API]
-        ING --> STR[(Valkey Stream Buffer)]
-        STR --> WRT[Microbatch Binary COPY Writer]
-        WRT --> DB[(PostgreSQL 18 Partitioned Storage)]
+    subgraph Platform [Tailwatch Processing Core]
+        CADDY --> API[FastAPI Ingestion]
+        API --> VK[(Valkey Stream Buffer)]
+        VK --> WRT[Binary COPY Writer Daemon]
+        WRT --> DB[(PostgreSQL 18 Partitioned Engine)]
     end
 
-    subgraph Verification [Zero-Loss Audit]
-        VER[chaosctl verify] -->|3. Query Ledger Event IDs| LEDGER
-        VER -->|4. Execute TQL Query: fields.event_id=UUID| ING
-        ING -->|5. Fetch from Database| DB
-        VER -->|6. Compare Dispatched vs Ingested| REP[Report: Delivery % and Latency]
+    subgraph AuditCheck [Completeness Audit]
+        VER[chaosctl.py verify] -->|3. Read Dispatched Event UUIDs| LEDGER
+        VER -->|4. Execute TQL Lookups: fields.event_id=UUID| API
+        API -->|5. Keyset Search in logs| DB
+        DB -->|6. Return Found Events| VER
+        VER -->|7. Calculate Completeness %| REPORT[PASS >= 99% / FAIL < 99%]
     end
 ```
 
-## Architecture & Principles
+---
 
-The Chaos Suite simulates an e-commerce platform composed of five interdependent services:
-- `shop-web`: User web application routing, cart actions, and product queries.
-- `shop-payment`: Payment processing gateway integrations and transaction handlers.
-- `shop-inventory`: Warehouse catalog queries and stock locking.
-- `shop-auth`: User authentication, session issuance, and login attempts.
-- `shop-worker`: Background job processor for order fulfillment and email dispatches.
+## 2. Component Breakdown: What Each File Does
 
-### Fault Scenarios
-
-| Scenario | Simulated Failure Condition | Injected Telemetry |
+| Path | Component | Responsibility |
 | :--- | :--- | :--- |
-| `steady` | Baseline continuous operation | HTTP 200/404, info/debug logs, p50 latency under 80ms |
-| `spike` | 10x traffic surge | High concurrency events, elevated warning logs |
-| `payment-outage` | Third-party payment gateway failure | HTTP 504 gateway timeouts, connection drop stack traces, fatal/error severities |
-| `database-slowdown` | Database connection saturation | High query latency (>3000ms), lock acquisition warnings on inventory tables |
-| `auth-attack` | Distributed brute force credential stuffing | Rapid HTTP 401 unauthorized attempts with varying user agents |
+| `generator.py` | **Synthetic Microservices Emitter** | Generates realistic log events across five services (`shop-web`, `shop-payment`, `shop-inventory`, `shop-auth`, `shop-worker`) simulating normal traffic and production failures. |
+| `ledger.py` | **SQLite Audit Ledger** | Standalone SQLite database (`chaos_ledger.db`) storing every generated event ID, timestamp, level, and scenario before network transmission. |
+| `chaosctl.py` | **Chaos CLI Controller** | Command-line interface providing `run` (continuous scenario traffic injector) and `verify` (end-to-end completeness auditor). |
+| `Dockerfile` | **Simulation Container** | Standalone container packaging Python dependencies to run chaos simulations in Docker networks. |
 
-### Audit Ledger & Completeness Verification
+---
 
-The generator writes every generated event ID, batch ID, service name, and timestamp into an independent SQLite database (`chaos_ledger.db`) before transmitting the payload to Tailwatch.
+## 3. Failure Scenarios
 
-The verification tool (`chaosctl verify`) queries the Tailwatch Search API via TQL for the stored event IDs. It cross-references the ingested records against the audit ledger to verify 100% ingestion completeness with zero lost events.
+| Scenario | Simulated Incident | Injected Telemetry Characteristics |
+| :--- | :--- | :--- |
+| `steady` | Baseline normal operations | Balanced mix of HTTP 200/404 responses, latency under 120ms, primarily INFO/DEBUG logs. |
+| `spike` | 10x sudden traffic surge | Elevated concurrency, active sessions between 5,000–15,000, latency up to 400ms. |
+| `payment-outage` | Payment gateway timeout | Gateway timeouts (504), connection timeouts to `api.stripe.com`, stack traces, ERROR and FATAL severities. |
+| `database-slowdown` | Database connection pool lockup | Slow queries on inventory tables (>3,000ms), lock acquisition warnings, pool saturation (50/50 busy). |
+| `auth-attack` | Brute-force credential stuffing | High-frequency 401 Unauthorized responses, varying client IPs, automated scanner user agents (e.g. Hydra). |
 
-## Project Structure
+---
 
-```
-chaos/
-├── generator.py              # Microservices log generator with fault scenarios
-├── ledger.py                 # SQLite audit ledger for recording dispatched events
-├── chaosctl.py               # CLI commands: run traffic injection and verify delivery
-├── Dockerfile                # Standalone Python simulation container
-├── __init__.py               # Python package initialization
-└── README.md                 # Chaos manual and test procedures
-```
+## 4. Usage & Verification
 
-## Usage
-
-### Prerequisites
-- Python 3.11+
-- `httpx`
-
+### 1. Run Steady-State Traffic
+Generate 50 logs/second for 10 seconds:
 ```bash
-pip install httpx
+python -m chaos.chaosctl run --scenario steady --rate 50 --duration 10 --batch-size 25
 ```
 
-### 1. Generating Traffic
-
-Run steady-state traffic for 30 seconds at 50 logs/second:
+### 2. Inject Distributed Failure Scenarios
 ```bash
-python -m chaos.chaosctl run \
-  --scenario steady \
-  --rate 50 \
-  --duration 30 \
-  --url http://localhost/v1/ingest \
-  --api-key twk_live_test_key_master
+# Inject payment gateway timeout failure
+python -m chaos.chaosctl run --scenario payment-outage --rate 25 --duration 10
+
+# Inject database lock contention
+python -m chaos.chaosctl run --scenario database-slowdown --rate 25 --duration 10
+
+# Inject credential stuffing attack
+python -m chaos.chaosctl run --scenario auth-attack --rate 50 --duration 10
 ```
 
-Inject a payment gateway outage scenario:
+### 3. Verify Zero-Loss Ingestion Completeness
+Audits the local SQLite ledger records against the Tailwatch search API:
 ```bash
-python -m chaos.chaosctl run \
-  --scenario payment-outage \
-  --rate 20 \
-  --duration 10 \
-  --url http://localhost/v1/ingest \
-  --api-key twk_live_test_key_master
+python -m chaos.chaosctl verify
 ```
 
-Simulate slow queries:
-```bash
-python -m chaos.chaosctl run \
-  --scenario database-slowdown \
-  --rate 15 \
-  --duration 10 \
-  --url http://localhost/v1/ingest \
-  --api-key twk_live_test_key_master
-```
-
-### 2. Verifying Delivery Completeness
-
-Verify that all dispatched events were stored in PostgreSQL 18 and are retrievable:
-```bash
-python -m chaos.chaosctl verify \
-  --url-base http://localhost \
-  --api-key twk_live_test_key_master
-```
-
-Example verification output:
-```
+Expected verification output:
+```text
 Verifying 500 chaos events against Tailwatch at http://localhost...
 Verification Result:
 Sample checked: 50 events
 Verified found: 50 events
 Delivery completeness: 100.0%
 PASS: Tailwatch verified zero-loss log ingestion.
-```
-
-### 3. Running via Docker Compose
-
-To run the chaos simulator inside the Docker network alongside Tailwatch:
-```bash
-docker compose -f compose.yaml -f compose.chaos.yaml up chaos
 ```

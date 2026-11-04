@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./Drawer.module.css";
-import { X, Copy } from "lucide-react";
+import { X, Copy, AlignLeft } from "lucide-react";
 import { Button } from "../Button/Button";
 import { LevelPill } from "../LevelPill/LevelPill";
 import { LogEntry } from "../../../features/logs/LogsExplorer/LogsExplorer";
@@ -18,8 +18,11 @@ export const Drawer: React.FC<DrawerProps> = ({
   onFilterByService,
 }) => {
   const { showToast } = useToast();
+  const [contextLogs, setContextLogs] = useState<LogEntry[]>([]);
+  const [loadingContext, setLoadingContext] = useState(false);
 
   useEffect(() => {
+    setContextLogs([]);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
@@ -27,13 +30,34 @@ export const Drawer: React.FC<DrawerProps> = ({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  }, [onClose, log]);
 
   if (!log) return null;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     showToast("Event JSON copied to clipboard", "success");
+  };
+
+  const loadSurroundingContext = async () => {
+    setLoadingContext(true);
+    try {
+      const url = new URL("/v1/logs/context", window.location.origin);
+      url.searchParams.set("log_id", log.id);
+      url.searchParams.set("ts", log.ts);
+      url.searchParams.set("service", log.service);
+      url.searchParams.set("lines", "10");
+
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const data = await res.json();
+        setContextLogs(data.events || []);
+      }
+    } catch {
+      showToast("Failed to load surrounding context", "error");
+    } finally {
+      setLoadingContext(false);
+    }
   };
 
   return (
@@ -104,6 +128,26 @@ export const Drawer: React.FC<DrawerProps> = ({
               </table>
             </div>
           )}
+
+          <div className={styles.section}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-2)" }}>
+              <span className={styles.sectionTitle}>Surrounding Context</span>
+              <Button size="sm" variant="secondary" loading={loadingContext} onClick={loadSurroundingContext}>
+                <AlignLeft size={14} />
+                <span>Fetch ±10 Lines</span>
+              </Button>
+            </div>
+            {contextLogs.length > 0 && (
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "var(--space-2)", maxHeight: "200px", overflowY: "auto" }}>
+                {contextLogs.map((c) => (
+                  <div key={c.id} style={{ display: "flex", gap: "var(--space-2)", padding: "2px 0", color: c.id === log.id ? "var(--accent)" : "var(--text-muted)" }}>
+                    <span>{new Date(c.ts).toLocaleTimeString()}</span>
+                    <span>{c.message}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.footerActions}>

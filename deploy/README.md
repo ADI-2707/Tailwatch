@@ -38,3 +38,4 @@ The PostgreSQL 18 configuration is optimized for append-only time-series data:
 - **Shared Buffers & Cache**: Configured to maximize block caching for index and partition lookups.
 - **WAL & Checkpoint Management**: Checkpoint segments and completion targets are tuned to prevent I/O write spikes during sustained high-concurrency ingestion bursts.
 - **Partition Pruning**: Daily range tables (`logs_pYYYYMMDD`) allow the database query planner to eliminate non-matching partitions during time-bounded TQL queries.
+

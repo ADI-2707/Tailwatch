@@ -15,10 +15,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24'
-          cache-dependency-path: agent/go.sum
       - name: Run Agent Unit Tests
         run: |
           cd agent
+          go mod tidy
           go test -v ./...
 
   server:
@@ -53,4 +53,3 @@ jobs:
           cd web
           npm ci
           npm run build
-

@@ -64,6 +64,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	go dockerCollector.Start(ctx)
 
 	go r.batchAndSendLoop(ctx)
+	go r.replaySpoolLoop(ctx)
 
 	<-ctx.Done()
 	return nil
@@ -103,7 +104,11 @@ func (r *Runner) batchAndSendLoop(ctx context.Context) {
 			_ = r.spooler.Append(raw)
 		}
 
-		_ = r.client.SendBatch(ctx, batch)
+		err = r.client.SendBatch(ctx, batch)
+		if err != nil {
+			_ = r.spooler.RotateNow()
+		}
+
 		currentBatch = nil
 	}
 
@@ -124,6 +129,50 @@ func (r *Runner) batchAndSendLoop(ctx context.Context) {
 
 		case <-ticker.C:
 			flush()
+		}
+	}
+}
+
+func (r *Runner) replaySpoolLoop(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			segments, err := r.spooler.ListOldSegments()
+			if err != nil || len(segments) == 0 {
+				continue
+			}
+
+			for _, segPath := range segments {
+				records, err := spool.ReadRecords(segPath)
+				if err != nil {
+					_ = r.spooler.RemoveSegment(segPath)
+					continue
+				}
+
+				allDelivered := true
+				for _, rec := range records {
+					var batch protocol.IngestBatch
+					if err := json.Unmarshal(rec, &batch); err != nil {
+						continue
+					}
+
+					if err := r.client.SendBatch(ctx, batch); err != nil {
+						allDelivered = false
+						break
+					}
+				}
+
+				if allDelivered {
+					_ = r.spooler.RemoveSegment(segPath)
+				} else {
+					break
+				}
+			}
 		}
 	}
 }

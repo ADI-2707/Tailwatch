@@ -1,101 +1,85 @@
 .container {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
 }
 
-.fiber {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
+.svgCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-:global([data-theme="light"]) .fiber {
-  background: rgba(0, 0, 0, 0.06);
+.wire {
+  fill: none;
+  stroke: rgba(255, 107, 53, 0.14);
+  stroke-width: 1.2px;
+  filter: drop-shadow(0 0 2px rgba(255, 107, 53, 0.25));
 }
 
-.fiber1 {
-  top: 18%;
-}
-
-.fiber2 {
-  top: 42%;
-}
-
-.fiber3 {
-  top: 68%;
-}
-
-.fiber4 {
-  top: 88%;
+:global([data-theme="light"]) .wire {
+  stroke: rgba(234, 88, 12, 0.16);
+  filter: drop-shadow(0 0 2px rgba(234, 88, 12, 0.2));
 }
 
 .packet {
-  position: absolute;
-  top: -0.5px;
-  height: 2px;
-  width: 40px;
-  border-radius: 9999px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--accent) 35%,
-    #ffffff 90%,
-    #ffeedd 100%
-  );
-  box-shadow: 0 0 6px var(--accent), 0 0 12px rgba(255, 107, 53, 0.6);
-  will-change: transform;
-}
-
-:global([data-theme="light"]) .packet {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--accent) 35%,
-    #ea580c 80%,
-    #c2410c 100%
-  );
-  box-shadow: 0 0 6px rgba(234, 88, 12, 0.5);
+  fill: none;
+  stroke-width: 2.2px;
+  stroke-linecap: round;
+  will-change: stroke-dashoffset;
 }
 
 .packet1 {
-  animation: transmit 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: -2s;
+  stroke: url(#packetGrad1);
+  stroke-dasharray: 60 1400;
+  animation: flowWave1 9s linear infinite;
+  filter: drop-shadow(0 0 5px #ff6b35);
 }
 
 .packet2 {
-  animation: transmit 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: -6s;
+  stroke: url(#packetGrad2);
+  stroke-dasharray: 50 1600;
+  animation: flowWave2 13s linear infinite;
+  animation-delay: -4s;
+  filter: drop-shadow(0 0 5px #f59e0b);
 }
 
 .packet3 {
-  animation: transmit 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: -3.5s;
+  stroke: url(#packetGrad3);
+  stroke-dasharray: 70 1500;
+  animation: flowWave3 11s linear infinite;
+  animation-delay: -2s;
+  filter: drop-shadow(0 0 5px #ff6b35);
 }
 
-.packet4 {
-  animation: transmit 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: -8s;
-}
-
-@keyframes transmit {
+@keyframes flowWave1 {
   0% {
-    transform: translateX(-60px);
-    opacity: 0;
-  }
-  3% {
-    opacity: 1;
-  }
-  95% {
-    opacity: 1;
+    stroke-dashoffset: 1460;
   }
   100% {
-    transform: translateX(calc(100vw + 60px));
-    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flowWave2 {
+  0% {
+    stroke-dashoffset: 1650;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flowWave3 {
+  0% {
+    stroke-dashoffset: 1570;
+  }
+  100% {
+    stroke-dashoffset: 0;
   }
 }
 

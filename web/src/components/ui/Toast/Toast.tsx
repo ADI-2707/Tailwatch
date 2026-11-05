@@ -231,13 +231,22 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ showToast, removeToast, toast }}>
       {children}
       <div className={styles.toastContainer} aria-live="polite">
-        {toasts.map((t) => {
+        {toasts.map((t, idx) => {
           const typeClass =
             styles[`toast${t.type.charAt(0).toUpperCase() + t.type.slice(1)}` as keyof typeof styles];
           const exitClass = t.isExiting ? styles.exiting : "";
+          const stackIndex = toasts.length - 1 - idx;
+          const hiddenBehindClass = stackIndex > 2 ? styles.hiddenBehind : "";
 
           return (
-            <div key={t.id} className={`${styles.toast} ${typeClass} ${exitClass}`}>
+            <div
+              key={t.id}
+              className={`${styles.toast} ${typeClass} ${exitClass} ${hiddenBehindClass}`}
+              style={{
+                "--stack-index": stackIndex,
+                zIndex: 100 - stackIndex,
+              } as React.CSSProperties}
+            >
               <div className={styles.toastBody}>
                 <div className={styles.contentGroup}>
                   {renderIcon(t.type)}

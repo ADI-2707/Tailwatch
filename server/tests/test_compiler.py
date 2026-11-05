@@ -50,6 +50,14 @@ class TestQueryCompiler(unittest.TestCase):
         self.assertEqual(sql, "fields->>'event_id' = $1")
         self.assertEqual(params, ["abc-123"])
 
+    def test_faceted_compound_query(self):
+        compiler = QueryCompiler('service:shop-payment level:error "timeout"')
+        sql, params = compiler.compile()
+        self.assertIn("service = $", sql)
+        self.assertIn("level = $", sql)
+        self.assertIn("message ILIKE $", sql)
+        self.assertEqual(len(params), 3)
+
     def test_compound_query(self):
         compiler = QueryCompiler("service:web level:error fields.status=500")
         sql, params = compiler.compile()

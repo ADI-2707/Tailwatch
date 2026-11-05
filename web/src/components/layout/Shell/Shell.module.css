@@ -21,17 +21,14 @@
 .brandGroup {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .logoMark {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-weight: 600;
-  font-size: 16px;
-  letter-spacing: -0.02em;
-  color: var(--text);
+  font-size: 14px;
   user-select: none;
 }
 
@@ -43,16 +40,24 @@
   box-shadow: 0 0 8px var(--accent);
 }
 
-.projectBadge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  background-color: var(--surface-raised);
-  border: 1px solid var(--border);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-md);
+.brandName {
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.breadcrumbDivider {
+  color: var(--text-subtle);
+  font-weight: 400;
   font-size: 13px;
+  user-select: none;
+}
+
+.projectText {
   color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .nav {
@@ -89,19 +94,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-}
-
-.searchHint {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  background-color: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 4px var(--space-2);
-  font-size: 12px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
 }
 
 .themeToggle {

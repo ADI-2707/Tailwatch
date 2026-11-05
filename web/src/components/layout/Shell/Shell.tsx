@@ -29,6 +29,30 @@ export const Shell: React.FC<ShellProps> = ({
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
+  const focusSearch = () => {
+    if (currentTab !== "logs") {
+      onTabChange?.("logs");
+    }
+    setTimeout(() => {
+      const searchEl = document.querySelector('input[placeholder*="Filter logs"]') as HTMLInputElement;
+      if (searchEl) {
+        searchEl.focus();
+        searchEl.select();
+      }
+    }, 50);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        focusSearch();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentTab]);
+
   const tabs: Array<{ id: ShellTab; label: string }> = [
     { id: "logs", label: "Logs" },
     { id: "tail", label: "Live Tail" },
@@ -44,10 +68,9 @@ export const Shell: React.FC<ShellProps> = ({
         <div className={styles.brandGroup}>
           <div className={styles.logoMark}>
             <span className={styles.logoDot} />
-            <span>Tailwatch</span>
-          </div>
-          <div className={styles.projectBadge}>
-            <span>/p/{projectSlug}</span>
+            <span className={styles.brandName}>Tailwatch</span>
+            <span className={styles.breadcrumbDivider}>/</span>
+            <span className={styles.projectText}>{projectSlug}</span>
           </div>
           <nav className={styles.nav}>
             {tabs.map((tab) => (
@@ -62,10 +85,6 @@ export const Shell: React.FC<ShellProps> = ({
           </nav>
         </div>
         <div className={styles.headerActions}>
-          <div className={styles.searchHint}>
-            <span>Search</span>
-            <kbd>/</kbd>
-          </div>
           <button
             className={styles.themeToggle}
             onClick={toggleTheme}

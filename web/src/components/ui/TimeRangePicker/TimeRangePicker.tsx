@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./TimeRangePicker.module.css";
-import { Clock, ChevronDown, Check } from "lucide-react";
+import { Clock, ChevronDown, Check } from "../Icon";
 
 export interface TimePreset {
   label: string;

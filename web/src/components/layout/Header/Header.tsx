@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Header.module.css";
 import { ShellTab } from "../Shell/Shell";
-import { Building2 } from "lucide-react";
+import { Building2 } from "../../ui/Icon";
 
 export interface HeaderProps {
   projectSlug: string;

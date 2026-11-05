@@ -5,7 +5,7 @@ import { Input } from "../../../components/ui/Input/Input";
 import { Tabs } from "../../../components/ui/Tabs/Tabs";
 import { StatusChip, AlertState } from "../../../components/ui/StatusChip/StatusChip";
 import { useToast } from "../../../components/ui/Toast/Toast";
-import { Plus, Bell, X, ShieldAlert, ListFilter, Send } from "lucide-react";
+import { Plus, Bell, X, ShieldAlert, ListFilter, Send } from "../../../components/ui/Icon";
 
 export interface AlertRule {
   id: string;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./OnboardingWizard.module.css";
 import { Button } from "../../components/ui/Button/Button";
 import { useToast } from "../../components/ui/Toast/Toast";
-import { Copy, ArrowRight } from "lucide-react";
+import { Copy, ArrowRight } from "../../components/ui/Icon";
 
 export interface OnboardingWizardProps {
   projectSlug: string;

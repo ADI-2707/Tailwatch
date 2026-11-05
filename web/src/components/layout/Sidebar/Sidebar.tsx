@@ -12,7 +12,7 @@ import {
   Sun,
   Moon,
   LogOut,
-} from "lucide-react";
+} from "../../ui/Icon";
 import { ShellTab } from "../Shell/Shell";
 
 export interface SidebarProps {

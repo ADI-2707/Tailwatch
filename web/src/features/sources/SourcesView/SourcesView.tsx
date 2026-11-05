@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./SourcesView.module.css";
-import { Server, Activity } from "lucide-react";
+import { Server, Activity } from "../../../components/ui/Icon";
 import { StatusChip } from "../../../components/ui/StatusChip/StatusChip";
 
 export interface AgentHost {

@@ -8,7 +8,7 @@ import { Drawer } from "../../../components/ui/Drawer/Drawer";
 import { ServiceFilter, ServiceItem } from "../../../components/ui/ServiceFilter/ServiceFilter";
 import { LevelFilterGroup, LogLevelName } from "../../../components/ui/LevelFilterGroup/LevelFilterGroup";
 import { TimeRangePicker } from "../../../components/ui/TimeRangePicker/TimeRangePicker";
-import { X, Search } from "lucide-react";
+import { X, Search } from "../../../components/ui/Icon";
 
 export interface LogEntry {
   id: string;

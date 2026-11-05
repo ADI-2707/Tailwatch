@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./LiveTail.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { LevelPill } from "../../../components/ui/LevelPill/LevelPill";
-import { Play, Pause, Trash2 } from "lucide-react";
+import { Play, Pause, Trash2 } from "../../../components/ui/Icon";
 import { LogEntry } from "../../logs/LogsExplorer/LogsExplorer";
 
 export const LiveTail: React.FC = () => {

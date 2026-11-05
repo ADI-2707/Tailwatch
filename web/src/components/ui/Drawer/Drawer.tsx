@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "./Drawer.module.css";
-import { X, Copy, AlignLeft } from "lucide-react";
+import { X, Copy, AlignLeft } from "../Icon";
 import { Button } from "../Button/Button";
 import { LevelPill } from "../LevelPill/LevelPill";
 import { LogEntry } from "../../../features/logs/LogsExplorer/LogsExplorer";

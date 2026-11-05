@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./SystemView.module.css";
-import { Database, HardDrive, Activity, Clock } from "lucide-react";
+import { Database, HardDrive, Activity, Clock } from "../../../components/ui/Icon";
 import { StatusChip } from "../../../components/ui/StatusChip/StatusChip";
 
 interface SystemStatus {

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import styles from "./QueryBar.module.css";
-import { Search } from "lucide-react";
+import { Search } from "../Icon";
 
 export interface FilterTag {
   key: string;

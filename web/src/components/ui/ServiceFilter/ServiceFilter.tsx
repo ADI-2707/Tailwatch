@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./ServiceFilter.module.css";
-import { ChevronDown, Check, Server } from "lucide-react";
+import { ChevronDown, Check, Server } from "../Icon";
 
 export interface ServiceItem {
   name: string;

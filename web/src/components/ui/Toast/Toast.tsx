@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import styles from "./Toast.module.css";
-import { CheckCircle2, AlertTriangle, AlertCircle, Info, X } from "lucide-react";
+import { CheckCircle2, AlertTriangle, AlertCircle, Info, X } from "../Icon";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 

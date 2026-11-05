@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import styles from "./AlertsView.module.css";
 import { Button } from "../../../components/ui/Button/Button";
 import { Input } from "../../../components/ui/Input/Input";
+import { Tabs } from "../../../components/ui/Tabs/Tabs";
 import { StatusChip, AlertState } from "../../../components/ui/StatusChip/StatusChip";
 import { useToast } from "../../../components/ui/Toast/Toast";
-import { Plus, Bell, X } from "lucide-react";
+import { Plus, Bell, X, ShieldAlert, ListFilter, Send } from "lucide-react";
 
 export interface AlertRule {
   id: string;
@@ -18,6 +19,7 @@ export interface AlertRule {
 
 export const AlertsView: React.FC = () => {
   const { showToast } = useToast();
+  const [activeSubTab, setActiveSubTab] = useState("rules");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRuleName, setNewRuleName] = useState("");
   const [newRuleQuery, setNewRuleQuery] = useState("");
@@ -90,44 +92,70 @@ export const AlertsView: React.FC = () => {
     );
   };
 
+  const subTabs = [
+    { id: "rules", label: "Alert Rules", badge: rules.length, icon: <ListFilter size={14} /> },
+    { id: "incidents", label: "Active Incidents", badge: 0, icon: <ShieldAlert size={14} /> },
+    { id: "channels", label: "Notification Channels", badge: 2, icon: <Send size={14} /> },
+  ];
+
   return (
     <div className={styles.alertsWrapper}>
-      <div className={styles.headerBar}>
-        <div>
-          <span className={styles.statsText}>
-            {rules.length} configured alert rules · 1 pending · Evaluated every 15s
-          </span>
-        </div>
-        <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
-          <Plus size={14} />
-          <span>New Alert Rule</span>
-        </Button>
-      </div>
-
-      <div className={styles.rulesList}>
-        {rules.map((rule) => (
-          <div key={rule.id} className={styles.ruleRow}>
-            <div className={styles.ruleMain}>
-              <StatusChip state={rule.state} />
-              <div className={styles.ruleInfo}>
-                <span className={styles.ruleName}>{rule.name}</span>
-                <span className={styles.ruleCondition}>
-                  {rule.query} &gt; {rule.threshold} / {rule.window_m}m
-                </span>
-              </div>
-            </div>
-
-            <div className={styles.ruleActions}>
-              <Button
-                size="sm"
-                variant={rule.enabled ? "secondary" : "ghost"}
-                onClick={() => toggleRule(rule.id)}
-              >
-                {rule.enabled ? "Enabled" : "Disabled"}
-              </Button>
-            </div>
+      <div className={styles.box}>
+        <div className={styles.headerBar}>
+          <div>
+            <span className={styles.statsText}>
+              {rules.length} configured alert rules · Background evaluator active
+            </span>
           </div>
-        ))}
+          <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
+            <Plus size={14} />
+            <span>New Alert Rule</span>
+          </Button>
+        </div>
+
+        <div className={styles.tabsContainer}>
+          <Tabs tabs={subTabs} activeTab={activeSubTab} onChange={setActiveSubTab} />
+        </div>
+
+        {activeSubTab === "rules" && (
+          <div className={styles.rulesList}>
+            {rules.map((rule) => (
+              <div key={rule.id} className={styles.ruleRow}>
+                <div className={styles.ruleMain}>
+                  <StatusChip state={rule.state} />
+                  <div className={styles.ruleInfo}>
+                    <span className={styles.ruleName}>{rule.name}</span>
+                    <span className={styles.ruleCondition}>
+                      {rule.query} &gt; {rule.threshold} / {rule.window_m}m
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.ruleActions}>
+                  <Button
+                    size="sm"
+                    variant={rule.enabled ? "secondary" : "ghost"}
+                    onClick={() => toggleRule(rule.id)}
+                  >
+                    {rule.enabled ? "Enabled" : "Disabled"}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeSubTab === "incidents" && (
+          <div className={styles.emptyState}>
+            <span>No active incidents detected. All thresholds normal.</span>
+          </div>
+        )}
+
+        {activeSubTab === "channels" && (
+          <div className={styles.emptyState}>
+            <span>Connected Channels: PagerDuty (Webhook) · Slack (#alerts-prod)</span>
+          </div>
+        )}
       </div>
 
       {isModalOpen && (

@@ -1,0 +1,100 @@
+.container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 107, 53, 0.05);
+}
+
+:global([data-theme="light"]) .track {
+  background: rgba(234, 88, 12, 0.06);
+}
+
+.track1 {
+  top: 22%;
+}
+
+.track2 {
+  top: 50%;
+}
+
+.track3 {
+  top: 78%;
+}
+
+.beam {
+  position: absolute;
+  top: -0.5px;
+  height: 2px;
+  width: 140px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 107, 53, 0.2) 20%,
+    #ff6b35 70%,
+    #ffc83b 95%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.8), 0 0 4px #ffc83b;
+  will-change: transform;
+}
+
+:global([data-theme="light"]) .beam {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(234, 88, 12, 0.2) 20%,
+    #ea580c 70%,
+    #d97706 95%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px rgba(234, 88, 12, 0.6);
+}
+
+.beam1 {
+  animation: travelBeam 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -2s;
+}
+
+.beam2 {
+  animation: travelBeam 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -7s;
+}
+
+.beam3 {
+  animation: travelBeam 11s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -4s;
+}
+
+@keyframes travelBeam {
+  0% {
+    transform: translateX(-160px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 160px));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    animation: none !important;
+    display: none;
+  }
+}

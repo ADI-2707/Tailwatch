@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./Shell.module.css";
 import { Sidebar } from "../Sidebar/Sidebar";
 import { Header } from "../Header/Header";
-import { PixelSlipstream } from "../../ui/PixelSlipstream/PixelSlipstream";
+import { DataStream } from "../../ui/DataStream/DataStream";
 
 export type ShellTab = "logs" | "tail" | "alerts" | "sources" | "system" | "onboarding";
 
@@ -43,7 +43,7 @@ export const Shell: React.FC<ShellProps> = ({
 
   return (
     <div className={styles.layout}>
-      <PixelSlipstream />
+      <DataStream />
       <Sidebar
         currentTab={currentTab}
         onTabChange={onTabChange}

@@ -61,6 +61,10 @@ export const Header: React.FC<HeaderProps> = ({
           <span className={styles.userName}>{firstName}</span>
         </div>
       </div>
+
+      <div className={styles.dataBeamTrack} aria-hidden="true">
+        <div className={styles.dataBeamPulse} />
+      </div>
     </header>
   );
 };

@@ -78,8 +78,12 @@ async def setup_initial_admin(payload: SetupRequest, response: Response):
             await cur.execute("""
                 INSERT INTO projects (id, slug, name, retention_days)
                 VALUES (%s, %s, %s, 14)
-                ON CONFLICT (slug) DO NOTHING;
+                ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+                RETURNING id;
             """, (project_id, payload.project_slug, payload.project_name))
+            row_p = await cur.fetchone()
+            if row_p:
+                project_id = row_p[0]
 
             await cur.execute("""
                 INSERT INTO memberships (user_id, project_id, role)

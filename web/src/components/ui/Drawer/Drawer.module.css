@@ -60,8 +60,12 @@
 }
 
 .closeButton:hover {
-  background-color: var(--surface-raised);
-  color: var(--text);
+  background-color: var(--danger-hover-bg);
+  color: var(--danger);
+}
+
+.closeButton:hover svg {
+  stroke: var(--danger);
 }
 
 .body {

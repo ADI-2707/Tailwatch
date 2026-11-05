@@ -139,8 +139,9 @@ export const AlertsView: React.FC = () => {
                 <span className={styles.modalTitle}>Create Alert Rule</span>
               </div>
               <button
-                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}
+                className={styles.modalCloseBtn}
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close modal"
               >
                 <X size={16} />
               </button>

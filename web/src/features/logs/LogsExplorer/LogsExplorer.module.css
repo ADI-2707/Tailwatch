@@ -85,15 +85,23 @@
 .removePill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 0;
+  padding: 1px 2px;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease);
 }
 
 .removePill:hover {
+  background-color: var(--danger-hover-bg);
   color: var(--danger);
+}
+
+.removePill:hover svg {
+  stroke: var(--danger);
 }
 
 .statsBar {

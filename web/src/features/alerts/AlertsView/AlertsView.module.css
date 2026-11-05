@@ -103,6 +103,28 @@
   justify-content: space-between;
 }
 
+.modalCloseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.modalCloseBtn:hover {
+  background-color: var(--danger-hover-bg);
+  color: var(--danger);
+}
+
+.modalCloseBtn:hover svg {
+  stroke: var(--danger);
+}
+
 .modalTitle {
   font-size: 15px;
   font-weight: 600;

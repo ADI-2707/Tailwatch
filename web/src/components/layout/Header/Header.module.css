@@ -21,24 +21,74 @@
 .breadcrumbSegment {
   font-weight: 500;
   color: var(--text);
+  padding: 0 2px;
 }
 
 .breadcrumbDivider {
   color: var(--text-subtle);
+  font-size: 12px;
+  user-select: none;
+}
+
+.orgBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px var(--space-2);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease);
+}
+
+.orgBadge:hover {
+  border-color: var(--accent);
+}
+
+.orgIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.orgName {
+  font-weight: 500;
+  color: var(--text);
   font-size: 12px;
 }
 
 .projectBadge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 2px var(--space-2);
+  gap: 5px;
+  padding: 3px var(--space-2);
   background-color: var(--surface-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+
+.projectBadge:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.selectorChevron {
+  color: var(--text-subtle);
+  flex-shrink: 0;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.orgBadge:hover .selectorChevron,
+.projectBadge:hover .selectorChevron {
+  color: var(--text);
 }
 
 .right {
@@ -53,6 +103,8 @@
   gap: var(--space-2);
   font-size: 12px;
   color: var(--text-muted);
+  cursor: default;
+  user-select: none;
 }
 
 .statusDot {
@@ -69,34 +121,6 @@
   background-color: var(--border);
 }
 
-.orgBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px var(--space-2);
-  background-color: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  color: var(--text-muted);
-  transition: border-color var(--duration-fast) var(--ease);
-}
-
-.orgBadge:hover {
-  border-color: var(--accent);
-}
-
-.orgIcon {
-  color: var(--text-subtle);
-  flex-shrink: 0;
-}
-
-.orgName {
-  font-weight: 500;
-  color: var(--text);
-  font-size: 12px;
-}
-
 .userProfile {
   display: inline-flex;
   align-items: center;
@@ -107,6 +131,7 @@
   border-radius: var(--radius-full);
   font-size: 12px;
   user-select: none;
+  cursor: pointer;
   transition: border-color var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
 }
 

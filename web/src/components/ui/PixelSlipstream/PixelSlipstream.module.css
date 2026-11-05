@@ -1,0 +1,99 @@
+.container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.08;
+  contain: strict;
+}
+
+:global([data-theme="light"]) .container {
+  opacity: 0.05;
+}
+
+.lane {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  will-change: transform;
+}
+
+.lane1 {
+  top: 14%;
+  animation: driftRight 28s linear infinite;
+  animation-delay: -4s;
+}
+
+.lane2 {
+  top: 36%;
+  animation: driftRight 22s linear infinite;
+  animation-delay: -11s;
+}
+
+.lane3 {
+  top: 60%;
+  animation: driftRight 34s linear infinite;
+  animation-delay: -18s;
+}
+
+.lane4 {
+  top: 82%;
+  animation: driftRight 26s linear infinite;
+  animation-delay: -8s;
+}
+
+.segmentGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.segment {
+  height: 2px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.segWarm {
+  background: linear-gradient(90deg, transparent, #ff6b35, #f59e0b, transparent);
+}
+
+.segAmber {
+  background: linear-gradient(90deg, transparent, #f59e0b, #ff7a45, transparent);
+}
+
+.segEmber {
+  background: linear-gradient(90deg, transparent, #ea580c, #c2410c, transparent);
+}
+
+:global([data-theme="light"]) .segWarm {
+  background: linear-gradient(90deg, transparent, #ea580c, #d97706, transparent);
+}
+
+:global([data-theme="light"]) .segAmber {
+  background: linear-gradient(90deg, transparent, #d97706, #ea580c, transparent);
+}
+
+:global([data-theme="light"]) .segEmber {
+  background: linear-gradient(90deg, transparent, #c2410c, #9a3412, transparent);
+}
+
+@keyframes driftRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lane {
+    animation: none !important;
+  }
+}

@@ -10,4 +10,5 @@ export * from "./StatusChip/StatusChip";
 export * from "./ServiceFilter/ServiceFilter";
 export * from "./LevelFilterGroup/LevelFilterGroup";
 export * from "./TimeRangePicker/TimeRangePicker";
+export * from "./Tooltip/Tooltip";
 

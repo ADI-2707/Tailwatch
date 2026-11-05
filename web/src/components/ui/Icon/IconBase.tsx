@@ -46,3 +46,4 @@ export const IconBase: React.FC<IconBaseProps> = ({
     </svg>
   );
 };
+

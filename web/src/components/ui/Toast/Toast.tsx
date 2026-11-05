@@ -212,6 +212,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, [removeToast]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === "t") {
+        e.preventDefault();
+        const firstToast = document.querySelector<HTMLElement>(`.${styles.toast}`);
+        firstToast?.focus();
+      } else if (e.key === "Escape" && toasts.length > 0) {
+        removeToast(toasts[toasts.length - 1].id);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toasts, removeToast]);
+
   const renderIcon = (type: ToastType) => {
     switch (type) {
       case "success":
@@ -230,7 +245,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ showToast, removeToast, toast }}>
       {children}
-      <div className={styles.toastContainer} aria-live="polite">
+      <div
+        className={styles.toastContainer}
+        role="region"
+        aria-label="Notifications (Alt+T)"
+        aria-live="polite"
+      >
         {toasts.map((t, idx) => {
           const typeClass =
             styles[`toast${t.type.charAt(0).toUpperCase() + t.type.slice(1)}` as keyof typeof styles];
@@ -241,11 +261,19 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return (
             <div
               key={t.id}
+              role={t.type === "error" || t.type === "warning" ? "alert" : "status"}
+              tabIndex={0}
               className={`${styles.toast} ${typeClass} ${exitClass} ${hiddenBehindClass}`}
               style={{
                 "--stack-index": stackIndex,
                 zIndex: 100 - stackIndex,
               } as React.CSSProperties}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.stopPropagation();
+                  removeToast(t.id);
+                }
+              }}
             >
               <div className={styles.toastBody}>
                 <div className={styles.contentGroup}>

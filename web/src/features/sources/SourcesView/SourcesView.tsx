@@ -61,9 +61,9 @@ export const SourcesView: React.FC = () => {
                   <StatusChip state={h.status} label="HEALTHY" />
                 </td>
                 <td className={styles.cell}>
-                  <div className={styles.hostGroup}>
-                    <Server size={14} color="var(--accent)" />
-                    <span>{h.name}</span>
+                  <div className={styles.hostCell}>
+                    <Server size={14} className={styles.hostIcon} />
+                    <span className={styles.hostName}>{h.name}</span>
                   </div>
                 </td>
                 <td className={styles.cell} style={{ fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>

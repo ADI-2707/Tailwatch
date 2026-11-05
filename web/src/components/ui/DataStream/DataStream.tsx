@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styles from "./DataStream.module.css";
 
 const PATH_1 =
@@ -9,8 +9,50 @@ const PATH_3 =
   "M -40 500 C 360 260, 820 620, 1480 560";
 
 export const DataStream: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let rafId: number | null = null;
+    let mouseX = -500;
+    let mouseY = -500;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          if (containerRef.current) {
+            containerRef.current.style.setProperty("--mouse-x", `${mouseX}px`);
+            containerRef.current.style.setProperty("--mouse-y", `${mouseY}px`);
+            containerRef.current.style.setProperty("--mouse-active", "1");
+          }
+          rafId = null;
+        });
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (containerRef.current) {
+        containerRef.current.style.setProperty("--mouse-active", "0");
+      }
+    };
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
   return (
-    <div className={styles.container} aria-hidden="true">
+    <div ref={containerRef} className={styles.container} aria-hidden="true">
+      <div className={styles.baseGrid} />
+      <div className={styles.spotlightHalo} />
+      <div className={styles.spotlightGrid} />
       <svg
         className={styles.svgCanvas}
         viewBox="0 0 1440 900"

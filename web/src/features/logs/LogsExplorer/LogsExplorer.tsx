@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./LogsExplorer.module.css";
 import { Input } from "../../../components/ui/Input/Input";
 import { Button } from "../../../components/ui/Button/Button";
 import { LevelPill } from "../../../components/ui/LevelPill/LevelPill";
 import { Histogram, HistogramBucket } from "../../../components/ui/Histogram/Histogram";
 import { Drawer } from "../../../components/ui/Drawer/Drawer";
+import { ServiceFilter, ServiceItem } from "../../../components/ui/ServiceFilter/ServiceFilter";
+import { LevelFilterGroup, LogLevelName } from "../../../components/ui/LevelFilterGroup/LevelFilterGroup";
+import { TimeRangePicker } from "../../../components/ui/TimeRangePicker/TimeRangePicker";
+import { X, Search } from "lucide-react";
 
 export interface LogEntry {
   id: string;
@@ -19,19 +23,47 @@ export interface LogEntry {
 }
 
 export const LogsExplorer: React.FC = () => {
-  const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<LogLevelName[]>([]);
+  const [selectedHours, setSelectedHours] = useState<number>(24);
+
+  const [availableServices, setAvailableServices] = useState<ServiceItem[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [buckets, setBuckets] = useState<HistogramBucket[]>([]);
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchLogs = async (overrideQuery?: string) => {
+  const buildQuery = useCallback(
+    (freeText: string, services: string[], levels: LogLevelName[]) => {
+      const parts: string[] = [];
+      if (freeText.trim()) parts.push(freeText.trim());
+      services.forEach((s) => parts.push(`service:${s}`));
+      levels.forEach((l) => parts.push(`level:${l}`));
+      return parts.join(" ");
+    },
+    []
+  );
+
+  const fetchFacets = async (hours: number) => {
+    try {
+      const res = await fetch(`/v1/logs/facets?hours=${Math.ceil(hours)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableServices(data.services || []);
+      }
+    } catch {
+      setAvailableServices([]);
+    }
+  };
+
+  const fetchLogs = async (overrideQ?: string) => {
     setLoading(true);
-    const activeQuery = overrideQuery !== undefined ? overrideQuery : query;
+    const q = overrideQ !== undefined ? overrideQ : buildQuery(searchQuery, selectedServices, selectedLevels);
     try {
       const url = new URL("/v1/logs", window.location.origin);
-      if (activeQuery.trim()) {
-        url.searchParams.set("q", activeQuery.trim());
+      if (q.trim()) {
+        url.searchParams.set("q", q.trim());
       }
       const res = await fetch(url.toString());
       if (res.ok) {
@@ -45,9 +77,10 @@ export const LogsExplorer: React.FC = () => {
     }
   };
 
-  const fetchHistogram = async () => {
+  const fetchHistogram = async (hours: number) => {
     try {
-      const res = await fetch("/v1/logs/histogram?hours=24&step_minutes=15");
+      const stepMinutes = hours <= 1 ? 1 : hours <= 6 ? 5 : 15;
+      const res = await fetch(`/v1/logs/histogram?hours=${Math.ceil(hours)}&step_minutes=${stepMinutes}`);
       if (res.ok) {
         const data = await res.json();
         setBuckets(data.buckets || []);
@@ -58,15 +91,27 @@ export const LogsExplorer: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchLogs();
-    fetchHistogram();
-  }, []);
+    fetchFacets(selectedHours);
+    fetchHistogram(selectedHours);
+  }, [selectedHours]);
+
+  useEffect(() => {
+    const q = buildQuery(searchQuery, selectedServices, selectedLevels);
+    fetchLogs(q);
+  }, [selectedServices, selectedLevels, selectedHours]);
+
+  const handleClearAll = () => {
+    setSearchQuery("");
+    setSelectedServices([]);
+    setSelectedLevels([]);
+    setSelectedHours(24);
+  };
 
   const handleFilterByService = (service: string) => {
-    const nextQ = `service:${service}`;
-    setQuery(nextQ);
+    if (!selectedServices.includes(service)) {
+      setSelectedServices([...selectedServices, service]);
+    }
     setSelectedLog(null);
-    fetchLogs(nextQ);
   };
 
   const formatTimestamp = (iso: string) => {
@@ -78,15 +123,18 @@ export const LogsExplorer: React.FC = () => {
     }
   };
 
+  const activePillsCount = selectedServices.length + selectedLevels.length + (searchQuery.trim() ? 1 : 0);
+
   return (
     <div className={styles.explorer}>
       <div className={styles.topBar}>
         <Input
           sizeVariant="lg"
           className={styles.searchInput}
-          placeholder="Filter logs... (e.g. timeout, service:payment, error)"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          prefixIcon={<Search size={16} />}
+          placeholder="Search log messages, traces, or fields (e.g. timeout, usr_42)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchLogs()}
         />
         <Button
@@ -96,9 +144,75 @@ export const LogsExplorer: React.FC = () => {
           loading={loading}
           onClick={() => fetchLogs()}
         >
-          Search
+          Search Logs
         </Button>
       </div>
+
+      <div className={styles.filtersRow}>
+        <div className={styles.filtersLeft}>
+          <ServiceFilter
+            services={availableServices}
+            selectedServices={selectedServices}
+            onChange={setSelectedServices}
+          />
+          <LevelFilterGroup
+            selectedLevels={selectedLevels}
+            onChange={setSelectedLevels}
+          />
+        </div>
+        <div className={styles.filtersRight}>
+          <TimeRangePicker
+            selectedHours={selectedHours}
+            onChange={setSelectedHours}
+          />
+          {activePillsCount > 0 && (
+            <button type="button" className={styles.clearBtn} onClick={handleClearAll}>
+              Clear All
+            </button>
+          )}
+        </div>
+      </div>
+
+      {activePillsCount > 0 && (
+        <div className={styles.activePillsRow}>
+          {searchQuery.trim() && (
+            <span className={styles.filterPill}>
+              <span>query: "{searchQuery.trim()}"</span>
+              <button
+                type="button"
+                className={styles.removePill}
+                onClick={() => setSearchQuery("")}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {selectedServices.map((svc) => (
+            <span key={svc} className={styles.filterPill}>
+              <span>service:{svc}</span>
+              <button
+                type="button"
+                className={styles.removePill}
+                onClick={() => setSelectedServices((prev) => prev.filter((s) => s !== svc))}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+          {selectedLevels.map((lvl) => (
+            <span key={lvl} className={styles.filterPill}>
+              <span>level:{lvl}</span>
+              <button
+                type="button"
+                className={styles.removePill}
+                onClick={() => setSelectedLevels((prev) => prev.filter((l) => l !== lvl))}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
 
       {buckets.length > 0 && (
         <Histogram
@@ -115,13 +229,13 @@ export const LogsExplorer: React.FC = () => {
 
       <div className={styles.statsBar}>
         <span>{logs.length} events loaded</span>
-        <span>Window: Last 24 hours</span>
+        <span>Window: Last {selectedHours < 1 ? "15 mins" : selectedHours === 1 ? "1 hour" : `${selectedHours} hours`}</span>
       </div>
 
       <div className={styles.tableWrapper}>
         {logs.length === 0 ? (
           <div className={styles.emptyState}>
-            <span>No matching log events found</span>
+            <span>No log events match query.</span>
             <span style={{ fontSize: "12px", color: "var(--text-subtle)" }}>
               Run the agent or send logs to /v1/ingest
             </span>

@@ -94,3 +94,4 @@ const CardFooter: React.FC<CardFooterProps> = ({
 Card.Header = CardHeader;
 Card.Body = CardBody;
 Card.Footer = CardFooter;
+

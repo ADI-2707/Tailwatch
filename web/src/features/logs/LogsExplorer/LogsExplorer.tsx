@@ -82,13 +82,20 @@ export const LogsExplorer: React.FC = () => {
     <div className={styles.explorer}>
       <div className={styles.topBar}>
         <Input
+          sizeVariant="lg"
           className={styles.searchInput}
           placeholder="Filter logs... (e.g. timeout, service:payment, error)"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchLogs()}
         />
-        <Button variant="primary" loading={loading} onClick={() => fetchLogs()}>
+        <Button
+          size="lg"
+          variant="primary"
+          className={styles.searchButton}
+          loading={loading}
+          onClick={() => fetchLogs()}
+        >
           Search
         </Button>
       </div>

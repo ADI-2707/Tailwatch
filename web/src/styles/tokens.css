@@ -59,6 +59,11 @@
   --shadow-overlay: rgba(0, 0, 0, 0.7);
   --shadow-dropdown: rgba(0, 0, 0, 0.4);
   --code-bg: #05070a;
+  --surface-box: #0d0d0d;
+  --surface-box-header: #141414;
+  --danger-hover-bg: rgba(239, 68, 68, 0.12);
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 64px;
 }
 
 [data-theme="light"] {
@@ -86,6 +91,11 @@
   --lvl-fatal: #db2777;
 
   --shadow-overlay: rgba(15, 23, 42, 0.45);
-  --shadow-dropdown: rgba(15, 23, 42, 0.12);
+  --shadow-dropdown: rgba(15, 23, 42, 0.08);
   --code-bg: #f1f5f9;
+  --surface-box: #ffffff;
+  --surface-box-header: #f8fafc;
+  --danger-hover-bg: rgba(220, 38, 38, 0.1);
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 64px;
 }

@@ -11,33 +11,58 @@
 
 .toast {
   pointer-events: auto;
+  position: relative;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  background-color: var(--surface-raised);
+  flex-direction: column;
+  background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px var(--shadow-dropdown);
   font-size: 13px;
   line-height: 18px;
   min-width: 280px;
   max-width: 420px;
-  animation: slideUp var(--duration-base) var(--ease);
-  transition: transform var(--duration-fast) var(--ease),
-              opacity var(--duration-fast) var(--ease);
+  overflow: hidden;
+  animation: bounceIn 260ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 180ms ease-in, opacity 180ms ease-in;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(16px);
+.toast.exiting {
+  animation: bounceOut 180ms cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: translateY(40px) scale(0.92);
     opacity: 0;
   }
-  to {
-    transform: translateY(0);
+  70% {
+    transform: translateY(-4px) scale(1.02);
     opacity: 1;
   }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceOut {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(30px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.toastBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
 }
 
 .contentGroup {
@@ -47,20 +72,52 @@
   flex: 1;
 }
 
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--accent);
+  transform-origin: left;
+  animation: progressDrain linear forwards;
+}
+
+@keyframes progressDrain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 .toastSuccess {
   border-left: 3px solid var(--success);
+}
+.toastSuccess .progressBar {
+  background-color: var(--success);
 }
 
 .toastError {
   border-left: 3px solid var(--danger);
 }
+.toastError .progressBar {
+  background-color: var(--danger);
+}
 
 .toastInfo {
   border-left: 3px solid var(--accent);
 }
+.toastInfo .progressBar {
+  background-color: var(--accent);
+}
 
 .toastWarning {
   border-left: 3px solid var(--warning);
+}
+.toastWarning .progressBar {
+  background-color: var(--warning);
 }
 
 .iconSuccess {

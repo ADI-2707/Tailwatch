@@ -8,7 +8,8 @@ export interface ToastItem {
   id: string;
   type: ToastType;
   message: string;
-  duration?: number;
+  duration: number;
+  isExiting?: boolean;
 }
 
 interface ToastContextValue {
@@ -22,7 +23,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    setToasts((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, isExiting: true } : t))
+    );
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 200);
   }, []);
 
   const showToast = useCallback((message: string, type: ToastType = "info", duration = 4000) => {
@@ -55,19 +61,28 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       <div className={styles.toastContainer} aria-live="polite">
         {toasts.map((t) => {
           const typeClass = styles[`toast${t.type.charAt(0).toUpperCase() + t.type.slice(1)}` as keyof typeof styles];
+          const exitClass = t.isExiting ? styles.exiting : "";
           return (
-            <div key={t.id} className={`${styles.toast} ${typeClass}`}>
-              <div className={styles.contentGroup}>
-                {renderIcon(t.type)}
-                <span className={styles.message}>{t.message}</span>
+            <div key={t.id} className={`${styles.toast} ${typeClass} ${exitClass}`}>
+              <div className={styles.toastBody}>
+                <div className={styles.contentGroup}>
+                  {renderIcon(t.type)}
+                  <span className={styles.message}>{t.message}</span>
+                </div>
+                <button
+                  className={styles.dismissButton}
+                  onClick={() => removeToast(t.id)}
+                  aria-label="Dismiss toast"
+                >
+                  <X size={14} />
+                </button>
               </div>
-              <button
-                className={styles.dismissButton}
-                onClick={() => removeToast(t.id)}
-                aria-label="Dismiss toast"
-              >
-                <X size={14} />
-              </button>
+              {t.duration > 0 && (
+                <div
+                  className={styles.progressBar}
+                  style={{ animationDuration: `${t.duration}ms` }}
+                />
+              )}
             </div>
           );
         })}

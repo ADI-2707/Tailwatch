@@ -6,14 +6,23 @@
   flex: 1;
 }
 
+.terminalBox {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
 .controlsBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-4);
+  background-color: var(--surface-box-header);
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
 }
 
 .leftControls {
@@ -55,11 +64,18 @@
   }
 }
 
+.clearBtn:hover {
+  background-color: var(--danger-hover-bg) !important;
+  color: var(--danger) !important;
+}
+
+.clearBtn:hover svg {
+  stroke: var(--danger) !important;
+}
+
 .terminalView {
   flex: 1;
   background-color: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
   padding: var(--space-4);
   font-family: var(--font-mono);
   font-size: 12px;

@@ -50,46 +50,48 @@ export const LiveTail: React.FC = () => {
 
   return (
     <div className={styles.liveTailWrapper}>
-      <div className={styles.controlsBar}>
-        <div className={styles.leftControls}>
-          <div className={styles.statusIndicator}>
-            <span className={isStreaming ? styles.liveDot : styles.pausedDot} />
-            <span>{isStreaming ? "Live Connected" : "Stream Paused"}</span>
-          </div>
-          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-            Buffer: {events.length} / 500 events
-          </span>
-        </div>
-
-        <div style={{ display: "flex", gap: "var(--space-2)" }}>
-          <Button size="sm" variant={isStreaming ? "secondary" : "primary"} onClick={toggleStream}>
-            {isStreaming ? <Pause size={14} /> : <Play size={14} />}
-            <span>{isStreaming ? "Pause" : "Resume"}</span>
-          </Button>
-          <Button size="sm" variant="ghost" onClick={clearBuffer}>
-            <Trash2 size={14} />
-            <span>Clear</span>
-          </Button>
-        </div>
-      </div>
-
-      <div ref={terminalRef} className={styles.terminalView}>
-        {events.length === 0 ? (
-          <div style={{ color: "var(--text-subtle)", textAlign: "center", padding: "var(--space-12)" }}>
-            <span>Waiting for live log stream...</span>
-          </div>
-        ) : (
-          events.map((ev, i) => (
-            <div key={i} className={styles.streamLine}>
-              <span className={styles.streamTs}>
-                {new Date(ev.ts).toLocaleTimeString("en-US", { hour12: false })}
-              </span>
-              <LevelPill level={ev.level} />
-              <span className={styles.streamService}>{ev.service}</span>
-              <span className={styles.streamMessage}>{ev.message}</span>
+      <div className={styles.terminalBox}>
+        <div className={styles.controlsBar}>
+          <div className={styles.leftControls}>
+            <div className={styles.statusIndicator}>
+              <span className={isStreaming ? styles.liveDot : styles.pausedDot} />
+              <span>{isStreaming ? "Live Connected" : "Stream Paused"}</span>
             </div>
-          ))
-        )}
+            <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+              Buffer: {events.length} / 500 events
+            </span>
+          </div>
+
+          <div style={{ display: "flex", gap: "var(--space-2)" }}>
+            <Button size="sm" variant={isStreaming ? "secondary" : "primary"} onClick={toggleStream}>
+              {isStreaming ? <Pause size={14} /> : <Play size={14} />}
+              <span>{isStreaming ? "Pause" : "Resume"}</span>
+            </Button>
+            <Button size="sm" variant="ghost" className={styles.clearBtn} onClick={clearBuffer}>
+              <Trash2 size={14} />
+              <span>Clear</span>
+            </Button>
+          </div>
+        </div>
+
+        <div ref={terminalRef} className={styles.terminalView}>
+          {events.length === 0 ? (
+            <div style={{ color: "var(--text-subtle)", textAlign: "center", padding: "var(--space-12)" }}>
+              <span>Waiting for live log stream...</span>
+            </div>
+          ) : (
+            events.map((ev, i) => (
+              <div key={i} className={styles.streamLine}>
+                <span className={styles.streamTs}>
+                  {new Date(ev.ts).toLocaleTimeString("en-US", { hour12: false })}
+                </span>
+                <LevelPill level={ev.level} />
+                <span className={styles.streamService}>{ev.service}</span>
+                <span className={styles.streamMessage}>{ev.message}</span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

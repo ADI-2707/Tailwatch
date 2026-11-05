@@ -35,13 +35,13 @@ export const SourcesView: React.FC = () => {
 
   return (
     <div className={styles.sourcesWrapper}>
-      <div className={styles.headerBar}>
-        <span className={styles.statsText}>
-          {hosts.length} connected active agent instances · Total Ingestion: 420 events/sec
-        </span>
-      </div>
+      <div className={styles.box}>
+        <div className={styles.headerBar}>
+          <span className={styles.statsText}>
+            {hosts.length} connected active agent instances · Total Ingestion: 420 events/sec
+          </span>
+        </div>
 
-      <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>

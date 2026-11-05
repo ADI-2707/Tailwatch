@@ -6,94 +6,101 @@
   overflow: hidden;
 }
 
-.track {
+.fiber {
   position: absolute;
   left: 0;
   right: 0;
   height: 1px;
-  background: rgba(255, 107, 53, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-:global([data-theme="light"]) .track {
-  background: rgba(234, 88, 12, 0.06);
+:global([data-theme="light"]) .fiber {
+  background: rgba(0, 0, 0, 0.06);
 }
 
-.track1 {
-  top: 22%;
+.fiber1 {
+  top: 18%;
 }
 
-.track2 {
-  top: 50%;
+.fiber2 {
+  top: 42%;
 }
 
-.track3 {
-  top: 78%;
+.fiber3 {
+  top: 68%;
 }
 
-.beam {
+.fiber4 {
+  top: 88%;
+}
+
+.packet {
   position: absolute;
   top: -0.5px;
   height: 2px;
-  width: 140px;
-  border-radius: 1px;
+  width: 40px;
+  border-radius: 9999px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 107, 53, 0.2) 20%,
-    #ff6b35 70%,
-    #ffc83b 95%,
-    transparent 100%
+    var(--accent) 35%,
+    #ffffff 90%,
+    #ffeedd 100%
   );
-  box-shadow: 0 0 10px rgba(255, 107, 53, 0.8), 0 0 4px #ffc83b;
+  box-shadow: 0 0 6px var(--accent), 0 0 12px rgba(255, 107, 53, 0.6);
   will-change: transform;
 }
 
-:global([data-theme="light"]) .beam {
+:global([data-theme="light"]) .packet {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(234, 88, 12, 0.2) 20%,
-    #ea580c 70%,
-    #d97706 95%,
-    transparent 100%
+    var(--accent) 35%,
+    #ea580c 80%,
+    #c2410c 100%
   );
-  box-shadow: 0 0 8px rgba(234, 88, 12, 0.6);
+  box-shadow: 0 0 6px rgba(234, 88, 12, 0.5);
 }
 
-.beam1 {
-  animation: travelBeam 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+.packet1 {
+  animation: transmit 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   animation-delay: -2s;
 }
 
-.beam2 {
-  animation: travelBeam 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: -7s;
+.packet2 {
+  animation: transmit 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -6s;
 }
 
-.beam3 {
-  animation: travelBeam 11s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  animation-delay: -4s;
+.packet3 {
+  animation: transmit 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -3.5s;
 }
 
-@keyframes travelBeam {
+.packet4 {
+  animation: transmit 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -8s;
+}
+
+@keyframes transmit {
   0% {
-    transform: translateX(-160px);
+    transform: translateX(-60px);
     opacity: 0;
   }
-  5% {
+  3% {
     opacity: 1;
   }
-  90% {
+  95% {
     opacity: 1;
   }
   100% {
-    transform: translateX(calc(100vw + 160px));
+    transform: translateX(calc(100vw + 60px));
     opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .beam {
+  .packet {
     animation: none !important;
     display: none;
   }

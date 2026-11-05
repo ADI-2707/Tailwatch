@@ -125,3 +125,41 @@ async def get_log_context(
                 raise HTTPException(status_code=500, detail=str(ex))
 
     return {"events": results, "count": len(results)}
+
+@router.get("/logs/facets")
+async def get_log_facets(hours: int = Query(default=24, le=168)):
+    now = datetime.now(timezone.utc)
+    from_time = now - timedelta(hours=hours)
+
+    query = """
+    SELECT service, level, count(*) as cnt
+    FROM logs
+    WHERE ts >= %s AND ts <= %s
+    GROUP BY service, level
+    ORDER BY cnt DESC;
+    """
+
+    services_map = {}
+    levels_map = {}
+
+    async with await psycopg.AsyncConnection.connect(settings.tw_database_url) as conn:
+        async with conn.cursor() as cur:
+            try:
+                await cur.execute(query, (from_time, now))
+                rows = await cur.fetchall()
+                for svc, lvl, cnt in rows:
+                    if svc:
+                        services_map[svc] = services_map.get(svc, 0) + cnt
+                    if lvl:
+                        levels_map[str(lvl)] = levels_map.get(str(lvl), 0) + cnt
+            except Exception:
+                pass
+
+    services = [{"name": k, "count": v} for k, v in sorted(services_map.items(), key=lambda x: x[1], reverse=True)]
+    levels = [{"name": k, "count": v} for k, v in sorted(levels_map.items(), key=lambda x: x[0])]
+
+    return {
+        "services": services,
+        "levels": levels,
+        "window_hours": hours
+    }

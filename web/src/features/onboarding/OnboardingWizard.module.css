@@ -96,7 +96,7 @@
 }
 
 .codeSnippet {
-  background-color: #05070a;
+  background-color: var(--code-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: var(--space-4);

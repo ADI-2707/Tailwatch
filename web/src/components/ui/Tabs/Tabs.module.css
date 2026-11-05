@@ -1,0 +1,56 @@
+.tabsList {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.tabTrigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease);
+  user-select: none;
+}
+
+.tabTrigger:hover {
+  color: var(--text);
+}
+
+.tabTrigger.active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.tabIndicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--accent);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--surface-raised);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-muted);
+}

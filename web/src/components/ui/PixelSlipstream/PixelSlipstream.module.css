@@ -4,12 +4,12 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  opacity: 0.08;
+  opacity: 0.65;
   contain: strict;
 }
 
 :global([data-theme="light"]) .container {
-  opacity: 0.05;
+  opacity: 0.45;
 }
 
 .lane {
@@ -18,69 +18,91 @@
   width: 200%;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 36px;
   will-change: transform;
 }
 
 .lane1 {
-  top: 14%;
-  animation: driftRight 28s linear infinite;
-  animation-delay: -4s;
+  top: 15%;
+  animation: driftRight 18s linear infinite;
+  animation-delay: -3s;
 }
 
 .lane2 {
-  top: 36%;
+  top: 32%;
+  animation: driftRight 14s linear infinite;
+  animation-delay: -8s;
+}
+
+.lane3 {
+  top: 52%;
+  animation: driftRight 20s linear infinite;
+  animation-delay: -14s;
+}
+
+.lane4 {
+  top: 70%;
+  animation: driftRight 16s linear infinite;
+  animation-delay: -5s;
+}
+
+.lane5 {
+  top: 86%;
   animation: driftRight 22s linear infinite;
   animation-delay: -11s;
 }
 
-.lane3 {
-  top: 60%;
-  animation: driftRight 34s linear infinite;
-  animation-delay: -18s;
-}
-
-.lane4 {
-  top: 82%;
-  animation: driftRight 26s linear infinite;
-  animation-delay: -8s;
-}
-
-.segmentGroup {
+.cluster {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 5px;
   flex-shrink: 0;
 }
 
-.segment {
-  height: 2px;
+.pixel {
+  height: 3px;
   border-radius: 1px;
   flex-shrink: 0;
 }
 
-.segWarm {
-  background: linear-gradient(90deg, transparent, #ff6b35, #f59e0b, transparent);
+.pixelWarm {
+  background-color: #ff6b35;
+  box-shadow: 0 0 7px rgba(255, 107, 53, 0.7);
 }
 
-.segAmber {
-  background: linear-gradient(90deg, transparent, #f59e0b, #ff7a45, transparent);
+.pixelAmber {
+  background-color: #ffaa40;
+  box-shadow: 0 0 7px rgba(255, 170, 64, 0.7);
 }
 
-.segEmber {
-  background: linear-gradient(90deg, transparent, #ea580c, #c2410c, transparent);
+.pixelGold {
+  background-color: #ffc83b;
+  box-shadow: 0 0 7px rgba(255, 200, 59, 0.7);
 }
 
-:global([data-theme="light"]) .segWarm {
-  background: linear-gradient(90deg, transparent, #ea580c, #d97706, transparent);
+.pixelEmber {
+  background-color: #ff4500;
+  box-shadow: 0 0 7px rgba(255, 69, 0, 0.7);
 }
 
-:global([data-theme="light"]) .segAmber {
-  background: linear-gradient(90deg, transparent, #d97706, #ea580c, transparent);
+:global([data-theme="light"]) .pixelWarm {
+  background-color: #ea580c;
+  box-shadow: 0 0 5px rgba(234, 88, 12, 0.45);
 }
 
-:global([data-theme="light"]) .segEmber {
-  background: linear-gradient(90deg, transparent, #c2410c, #9a3412, transparent);
+:global([data-theme="light"]) .pixelAmber {
+  background-color: #f59e0b;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.45);
+}
+
+:global([data-theme="light"]) .pixelGold {
+  background-color: #d97706;
+  box-shadow: 0 0 5px rgba(217, 119, 6, 0.45);
+}
+
+:global([data-theme="light"]) .pixelEmber {
+  background-color: #c2410c;
+  box-shadow: 0 0 5px rgba(194, 65, 12, 0.45);
 }
 
 @keyframes driftRight {
@@ -97,4 +119,3 @@
     animation: none !important;
   }
 }
-

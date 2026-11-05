@@ -1,120 +1,15 @@
 .layout {
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg);
 }
 
-.header {
-  height: 56px;
+.mainContainer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--space-6);
-  border-bottom: 1px solid var(--border);
-  background-color: var(--surface);
-  position: sticky;
-  top: 0;
-  z-index: var(--z-sticky);
-}
-
-.brandGroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-}
-
-.logoMark {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: 14px;
-  user-select: none;
-}
-
-.logoDot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background-color: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-}
-
-.brandName {
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.02em;
-}
-
-.breadcrumbDivider {
-  color: var(--text-subtle);
-  font-weight: 400;
-  font-size: 13px;
-  user-select: none;
-}
-
-.projectText {
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.nav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.navItem {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 13px;
-  transition: color var(--duration-fast) var(--ease),
-              background-color var(--duration-fast) var(--ease);
-}
-
-.navItem:hover {
-  color: var(--text);
-  background-color: var(--surface-raised);
-  text-decoration: none;
-}
-
-.navItem.active {
-  color: var(--text);
-  background-color: var(--surface-raised);
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.themeToggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
-  background-color: var(--surface-raised);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color var(--duration-fast) var(--ease),
-              border-color var(--duration-fast) var(--ease),
-              background-color var(--duration-fast) var(--ease);
-}
-
-.themeToggle:hover {
-  color: var(--text);
-  border-color: var(--border-strong);
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .content {

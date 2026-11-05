@@ -2,11 +2,11 @@ import React from "react";
 import styles from "./DataStream.module.css";
 
 const PATH_1 =
-  "M -60 220 C 320 100, 680 340, 1040 180 C 1220 110, 1380 260, 1520 230";
+  "M -40 160 C 450 360, 900 200, 1480 420";
 const PATH_2 =
-  "M -60 500 C 260 640, 620 390, 980 570 C 1210 690, 1370 460, 1520 520";
+  "M -40 680 C 420 440, 960 520, 1480 180";
 const PATH_3 =
-  "M -60 740 C 310 860, 700 650, 1050 790 C 1250 870, 1390 740, 1520 770";
+  "M -40 500 C 360 260, 820 620, 1480 560";
 
 export const DataStream: React.FC = () => {
   return (
@@ -24,7 +24,7 @@ export const DataStream: React.FC = () => {
             <stop offset="100%" stopColor="#ffeedd" />
           </linearGradient>
 
-          <linearGradient id="packetGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="packetGrad2" x1="100%" y1="0%" x2="0%" y2="0%">
             <stop offset="0%" stopColor="transparent" />
             <stop offset="50%" stopColor="#ea580c" />
             <stop offset="90%" stopColor="#ffc83b" />

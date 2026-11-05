@@ -16,67 +16,67 @@
 
 .wire {
   fill: none;
-  stroke: rgba(255, 107, 53, 0.14);
+  stroke: rgba(255, 107, 53, 0.15);
   stroke-width: 1.2px;
   filter: drop-shadow(0 0 2px rgba(255, 107, 53, 0.25));
 }
 
 :global([data-theme="light"]) .wire {
-  stroke: rgba(234, 88, 12, 0.16);
+  stroke: rgba(234, 88, 12, 0.18);
   filter: drop-shadow(0 0 2px rgba(234, 88, 12, 0.2));
 }
 
 .packet {
   fill: none;
-  stroke-width: 2.2px;
+  stroke-width: 2.4px;
   stroke-linecap: round;
   will-change: stroke-dashoffset;
 }
 
 .packet1 {
   stroke: url(#packetGrad1);
-  stroke-dasharray: 60 1400;
-  animation: flowWave1 9s linear infinite;
+  stroke-dasharray: 60 1600;
+  animation: flowForward1 9s linear infinite;
   filter: drop-shadow(0 0 5px #ff6b35);
 }
 
 .packet2 {
   stroke: url(#packetGrad2);
-  stroke-dasharray: 50 1600;
-  animation: flowWave2 13s linear infinite;
-  animation-delay: -4s;
-  filter: drop-shadow(0 0 5px #f59e0b);
+  stroke-dasharray: 55 1650;
+  animation: flowReverse2 12s linear infinite;
+  animation-delay: -3s;
+  filter: drop-shadow(0 0 5px #ffc83b);
 }
 
 .packet3 {
   stroke: url(#packetGrad3);
-  stroke-dasharray: 70 1500;
-  animation: flowWave3 11s linear infinite;
-  animation-delay: -2s;
+  stroke-dasharray: 70 1620;
+  animation: flowForward3 10s linear infinite;
+  animation-delay: -5s;
   filter: drop-shadow(0 0 5px #ff6b35);
 }
 
-@keyframes flowWave1 {
+@keyframes flowForward1 {
   0% {
-    stroke-dashoffset: 1460;
+    stroke-dashoffset: 1660;
   }
   100% {
     stroke-dashoffset: 0;
   }
 }
 
-@keyframes flowWave2 {
+@keyframes flowReverse2 {
   0% {
-    stroke-dashoffset: 1650;
+    stroke-dashoffset: 0;
   }
   100% {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: 1705;
   }
 }
 
-@keyframes flowWave3 {
+@keyframes flowForward3 {
   0% {
-    stroke-dashoffset: 1570;
+    stroke-dashoffset: 1690;
   }
   100% {
     stroke-dashoffset: 0;

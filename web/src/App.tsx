@@ -80,6 +80,8 @@ export const App: React.FC = () => {
       onTabChange={setCurrentTab}
       projectSlug={projectSlug}
       onLogout={handleLogout}
+      user={authStatus.user}
+      orgName="Tailwatch"
     >
       {currentTab === "logs" && <LogsExplorer />}
       {currentTab === "tail" && <LiveTail />}

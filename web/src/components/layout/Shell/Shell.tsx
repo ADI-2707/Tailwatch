@@ -11,6 +11,11 @@ export interface ShellProps {
   onTabChange?: (tab: ShellTab) => void;
   projectSlug?: string;
   onLogout?: () => void;
+  user?: {
+    name?: string;
+    email?: string;
+  };
+  orgName?: string;
 }
 
 export const Shell: React.FC<ShellProps> = ({
@@ -19,6 +24,8 @@ export const Shell: React.FC<ShellProps> = ({
   onTabChange = () => {},
   projectSlug = "production",
   onLogout,
+  user,
+  orgName,
 }) => {
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     return (localStorage.getItem("tw_theme") as "dark" | "light") || "dark";
@@ -43,7 +50,12 @@ export const Shell: React.FC<ShellProps> = ({
         onToggleTheme={toggleTheme}
       />
       <div className={styles.mainContainer}>
-        <Header projectSlug={projectSlug} currentTab={currentTab} />
+        <Header
+          projectSlug={projectSlug}
+          currentTab={currentTab}
+          user={user}
+          orgName={orgName}
+        />
         <main className={styles.content}>{children}</main>
       </div>
     </div>

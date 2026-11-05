@@ -127,92 +127,94 @@ export const LogsExplorer: React.FC = () => {
 
   return (
     <div className={styles.explorer}>
-      <div className={styles.topBar}>
-        <Input
-          sizeVariant="lg"
-          className={styles.searchInput}
-          prefixIcon={<Search size={16} />}
-          placeholder="Search log messages, traces, or fields (e.g. timeout, usr_42)..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && fetchLogs()}
-        />
-        <Button
-          size="lg"
-          variant="primary"
-          className={styles.searchButton}
-          loading={loading}
-          onClick={() => fetchLogs()}
-        >
-          Search Logs
-        </Button>
-      </div>
+      <div className={styles.searchBox}>
+        <div className={styles.topBar}>
+          <Input
+            sizeVariant="lg"
+            className={styles.searchInput}
+            prefixIcon={<Search size={16} />}
+            placeholder="Search log messages, traces, or fields (e.g. timeout, usr_42)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && fetchLogs()}
+          />
+          <Button
+            size="lg"
+            variant="primary"
+            className={styles.searchButton}
+            loading={loading}
+            onClick={() => fetchLogs()}
+          >
+            Search Logs
+          </Button>
+        </div>
 
-      <div className={styles.filtersRow}>
-        <div className={styles.filtersLeft}>
-          <ServiceFilter
-            services={availableServices}
-            selectedServices={selectedServices}
-            onChange={setSelectedServices}
-          />
-          <LevelFilterGroup
-            selectedLevels={selectedLevels}
-            onChange={setSelectedLevels}
-          />
+        <div className={styles.filtersRow}>
+          <div className={styles.filtersLeft}>
+            <ServiceFilter
+              services={availableServices}
+              selectedServices={selectedServices}
+              onChange={setSelectedServices}
+            />
+            <LevelFilterGroup
+              selectedLevels={selectedLevels}
+              onChange={setSelectedLevels}
+            />
+          </div>
+          <div className={styles.filtersRight}>
+            <TimeRangePicker
+              selectedHours={selectedHours}
+              onChange={setSelectedHours}
+            />
+            {activePillsCount > 0 && (
+              <button type="button" className={styles.clearBtn} onClick={handleClearAll}>
+                Clear All
+              </button>
+            )}
+          </div>
         </div>
-        <div className={styles.filtersRight}>
-          <TimeRangePicker
-            selectedHours={selectedHours}
-            onChange={setSelectedHours}
-          />
-          {activePillsCount > 0 && (
-            <button type="button" className={styles.clearBtn} onClick={handleClearAll}>
-              Clear All
-            </button>
-          )}
-        </div>
-      </div>
 
-      {activePillsCount > 0 && (
-        <div className={styles.activePillsRow}>
-          {searchQuery.trim() && (
-            <span className={styles.filterPill}>
-              <span>query: "{searchQuery.trim()}"</span>
-              <button
-                type="button"
-                className={styles.removePill}
-                onClick={() => setSearchQuery("")}
-              >
-                <X size={12} />
-              </button>
-            </span>
-          )}
-          {selectedServices.map((svc) => (
-            <span key={svc} className={styles.filterPill}>
-              <span>service:{svc}</span>
-              <button
-                type="button"
-                className={styles.removePill}
-                onClick={() => setSelectedServices((prev) => prev.filter((s) => s !== svc))}
-              >
-                <X size={12} />
-              </button>
-            </span>
-          ))}
-          {selectedLevels.map((lvl) => (
-            <span key={lvl} className={styles.filterPill}>
-              <span>level:{lvl}</span>
-              <button
-                type="button"
-                className={styles.removePill}
-                onClick={() => setSelectedLevels((prev) => prev.filter((l) => l !== lvl))}
-              >
-                <X size={12} />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
+        {activePillsCount > 0 && (
+          <div className={styles.activePillsRow}>
+            {searchQuery.trim() && (
+              <span className={styles.filterPill}>
+                <span>query: "{searchQuery.trim()}"</span>
+                <button
+                  type="button"
+                  className={styles.removePill}
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            )}
+            {selectedServices.map((svc) => (
+              <span key={svc} className={styles.filterPill}>
+                <span>service:{svc}</span>
+                <button
+                  type="button"
+                  className={styles.removePill}
+                  onClick={() => setSelectedServices((prev) => prev.filter((s) => s !== svc))}
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+            {selectedLevels.map((lvl) => (
+              <span key={lvl} className={styles.filterPill}>
+                <span>level:{lvl}</span>
+                <button
+                  type="button"
+                  className={styles.removePill}
+                  onClick={() => setSelectedLevels((prev) => prev.filter((l) => l !== lvl))}
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
       {buckets.length > 0 && (
         <Histogram

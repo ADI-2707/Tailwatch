@@ -37,3 +37,4 @@ class TestQueryFacetsAndFilters(unittest.TestCase):
         self.assertIn("fields->>'status_code' = $", sql)
         self.assertIn("level = $", sql)
         self.assertEqual(len(params), 3)
+
